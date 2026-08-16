@@ -431,7 +431,7 @@ export const createThemeSettingsComponent = ({
           <div className={themeClasses.mutedText}>{description}</div>
 
           <div className="flex items-center gap-1">
-            <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
+            <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto p-px">
               {QUICK_SWATCHES.map((swatch) => {
                 const selected =
                   resolveColorValue(storedValue)?.toLowerCase() ===

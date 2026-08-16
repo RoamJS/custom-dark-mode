@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Added a small inset around quick color swatches so their borders remain fully visible.
 - Removed crowded background boxes from native icon controls while preserving readable icon colors.
 - Made the advanced native search dialog use a single dark surface with a neutral selected result.
 - Added a subtle main-window linked reference row background without changing references in other surfaces.
