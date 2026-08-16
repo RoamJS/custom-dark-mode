@@ -291,6 +291,14 @@ body.${THEME_CLASS},
   border-color: ${color("border")} !important;
 }
 
+.${THEME_CLASS} #zotero-roam-portal .zr-auxiliary-dialog--settings .zr-settings-tabs-wrapper > .bp3-tab-list {
+  background-color: ${color("sidebarSurface")} !important;
+}
+
+.${THEME_CLASS} #zotero-roam-portal .zr-auxiliary-dialog--settings .zr-settings-panel .zr-secondary {
+  color: ${color("mutedText")} !important;
+}
+
 .${THEME_CLASS} .bp3-menu-item,
 .${THEME_CLASS} .rm-autocomplete-result,
 .${THEME_CLASS} .rm-settings__tab,
