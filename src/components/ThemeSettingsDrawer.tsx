@@ -149,7 +149,7 @@ export const createThemeSettingsDrawerController = ({
 
     ReactDOM.render(
       <aside
-        aria-label="Custom Dark Theme settings"
+        aria-label="Custom Dark Mode settings"
         className={DRAWER_CLASS_NAMES[colorScheme]}
         style={getDrawerStyle({ colorScheme })}
       >
@@ -157,9 +157,9 @@ export const createThemeSettingsDrawerController = ({
           className={DRAWER_HEADER_CLASS_NAMES[colorScheme]}
           style={DRAWER_HEADER_STYLE}
         >
-          <span className="m-0 font-semibold leading-5">Custom Dark Theme</span>
+          <span className="m-0 font-semibold leading-5">Custom Dark Mode</span>
           <Button
-            aria-label="Close Custom Dark Theme settings"
+            aria-label="Close Custom Dark Mode settings"
             minimal
             onClick={close}
             small

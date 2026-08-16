@@ -661,7 +661,7 @@ export const createThemeSettingsComponent = ({
             </select>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Theme</span>
+            <span className="font-medium">Palette</span>
             <select className="bp3-input" disabled value={settings.preset}>
               <option value={DEFAULT_THEME_PRESET.id}>
                 {DEFAULT_THEME_PRESET.name}
