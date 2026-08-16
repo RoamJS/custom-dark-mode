@@ -17,12 +17,6 @@
 - Per-user settings that do not write to `roam/css`
 - Command palette actions for opening settings and quickly toggling the theme
 
-## Installation
-
-1. Open **Roam Depot** from Roam Settings.
-2. Search for **Custom Dark Theme**.
-3. Select the extension and click **Install**.
-
 ## Usage
 
 Open **Roam Settings → Extensions → Custom Dark Theme**, then click **Open Theme Sidebar**. You can also run **Custom Dark Theme: Open Settings** from the command palette.
