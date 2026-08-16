@@ -13,6 +13,17 @@ type ThemeSettingsDrawerController = {
   unload: () => void;
 };
 
+const SETTINGS_MODAL_OVERLAY_SELECTOR =
+  ".rm-modal-portal--settings .bp3-overlay";
+
+export const getDrawerMountContainer = ({
+  ownerDocument,
+}: {
+  ownerDocument: Document;
+}): HTMLElement =>
+  ownerDocument.querySelector<HTMLElement>(SETTINGS_MODAL_OVERLAY_SELECTOR) ||
+  ownerDocument.body;
+
 const getBrowserPrefersDark = (): boolean =>
   typeof window !== "undefined" && typeof window.matchMedia === "function"
     ? window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -167,6 +178,7 @@ export const createThemeSettingsDrawerController = ({
 
   return {
     open: () => {
+      getDrawerMountContainer({ ownerDocument: document }).appendChild(root);
       isOpen = true;
       render();
     },
