@@ -36,3 +36,4 @@ Run **Custom Dark Mode: Toggle Dark Mode** from the command palette to switch be
 
 - Preset themes drawn from the theme-design mockups: black, gray, terminal, monochrome (black and white), and Ubuntu
 - Save and load your own custom themes
+- Preview color changes with example pages/components
