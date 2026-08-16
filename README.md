@@ -30,3 +30,8 @@ Choose a mode:
 Expand a color group to customize individual roles with a suggested swatch, a Tailwind color token such as `slate-900`, or a hex value such as `#0f172a`. Use **Reset all** to return every color to the default palette.
 
 Run **Custom Dark Theme: Toggle Dark Mode** from the command palette to switch between Off and your previously selected Dark or Auto mode.
+
+## Roadmap
+
+- Preset themes drawn from the theme-design mockups: black, gray, terminal, monochrome (black and white), and Ubuntu
+- Save and load your own custom themes
