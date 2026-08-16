@@ -19,7 +19,7 @@
 
 ## Usage
 
-Open **Roam Settings → Extensions → Custom Dark Theme**, then click **Open Theme Sidebar**. You can also run **Custom Dark Theme: Open Settings** from the command palette.
+Run **Custom Dark Theme: Open Settings** from the command palette.
 
 Choose a mode:
 
