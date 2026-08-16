@@ -1,7 +1,7 @@
 {
   "name": "custom-dark-mode",
   "version": "1.0.0",
-  "description": "A per-user customizable, color-only dark mode for Roam Research.",
+  "description": "A per-user customizable, color-only dark mode.",
   "main": "index.js",
   "scripts": {
     "postinstall": "patch-package",
@@ -17,7 +17,10 @@
     "roamjs",
     "dark-mode",
     "color-theme",
-    "colors"
+    "colors",
+    "dark mode",
+    "dark theme",
+    "custom theme"
   ],
   "license": "MIT",
   "dependencies": {
