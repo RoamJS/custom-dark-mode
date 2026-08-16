@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Tailored quick color swatches to each theme role and made the selected swatch clear with a high-contrast outline and checkmark.
 - Added a small inset around quick color swatches so their borders remain fully visible.
 - Removed crowded background boxes from native icon controls while preserving readable icon colors.
 - Made the advanced native search dialog use a single dark surface with a neutral selected result.

@@ -24,6 +24,7 @@ import {
   TAILWIND_COLOR_GROUPS,
   TAILWIND_COLOR_SWATCHES,
 } from "~/theme/tailwindColors";
+import type { TailwindColorSwatch } from "~/theme/tailwindColors";
 import { persistThemeSettings, updatePaletteOverride } from "~/utils/settings";
 
 type ThemeSettingsComponentDependencies = {
@@ -73,7 +74,7 @@ export const getColorGroupExpansionState = ({
     return groups;
   }, {});
 
-const QUICK_SWATCH_TOKENS = [
+const SURFACE_SWATCH_TOKENS = [
   "slate-950",
   "slate-900",
   "slate-800",
@@ -82,7 +83,102 @@ const QUICK_SWATCH_TOKENS = [
   "neutral-900",
   "blue-950",
   "violet-950",
-];
+] as const;
+
+const TEXT_SWATCH_TOKENS = [
+  "slate-50",
+  "slate-100",
+  "slate-200",
+  "slate-300",
+  "slate-400",
+  "gray-200",
+  "zinc-200",
+  "neutral-200",
+] as const;
+
+const LINK_SWATCH_TOKENS = [
+  "sky-300",
+  "sky-400",
+  "sky-500",
+  "blue-300",
+  "blue-400",
+  "cyan-300",
+  "cyan-400",
+  "violet-300",
+] as const;
+
+const BULLET_SWATCH_TOKENS = [
+  "slate-200",
+  "slate-300",
+  "slate-400",
+  "slate-500",
+  "gray-300",
+  "zinc-300",
+  "sky-400",
+  "violet-400",
+] as const;
+
+export const QUICK_SWATCH_TOKENS_BY_ROLE: Record<
+  ThemeColorRole,
+  readonly string[]
+> = {
+  appBackground: SURFACE_SWATCH_TOKENS,
+  mainSurface: SURFACE_SWATCH_TOKENS,
+  sidebarSurface: SURFACE_SWATCH_TOKENS,
+  elevatedSurface: SURFACE_SWATCH_TOKENS,
+  inputSurface: SURFACE_SWATCH_TOKENS,
+  popoverSurface: SURFACE_SWATCH_TOKENS,
+  primaryText: TEXT_SWATCH_TOKENS,
+  secondaryText: TEXT_SWATCH_TOKENS,
+  mutedText: TEXT_SWATCH_TOKENS,
+  accent: LINK_SWATCH_TOKENS,
+  accentHover: LINK_SWATCH_TOKENS,
+  pageReference: LINK_SWATCH_TOKENS,
+  blockReference: LINK_SWATCH_TOKENS,
+  border: [
+    "slate-800",
+    "slate-700",
+    "slate-600",
+    "slate-500",
+    "gray-700",
+    "zinc-700",
+    "neutral-700",
+    "blue-800",
+  ],
+  hoverSurface: [
+    "slate-900",
+    "slate-800",
+    "slate-700",
+    "gray-800",
+    "zinc-800",
+    "neutral-800",
+    "blue-950",
+    "violet-950",
+  ],
+  selectedSurface: [
+    "slate-800",
+    "slate-700",
+    "blue-950",
+    "blue-900",
+    "sky-950",
+    "cyan-950",
+    "violet-950",
+    "purple-950",
+  ],
+  highlight: [
+    "amber-200",
+    "amber-300",
+    "amber-400",
+    "orange-300",
+    "orange-400",
+    "rose-300",
+    "sky-300",
+    "violet-300",
+  ],
+  codeSurface: SURFACE_SWATCH_TOKENS,
+  embedSurface: SURFACE_SWATCH_TOKENS,
+  bullet: BULLET_SWATCH_TOKENS,
+};
 
 export const SETTINGS_THEME_CLASSES: Record<
   ThemeColorScheme,
@@ -97,9 +193,8 @@ export const SETTINGS_THEME_CLASSES: Record<
     mutedText: "text-xs text-slate-400",
     primaryText: "text-slate-100",
     rootText: "text-slate-100",
-    selectedSwatchBorder: "border-sky-300",
-    selectedSwatchShadow:
-      "inset 0 0 0 2px #38bdf8, inset 0 0 0 3px rgba(15, 23, 42, 0.72)",
+    selectedSwatchBorder: "border-transparent",
+    selectedSwatchShadow: "inset 0 0 0 2px #ffffff, inset 0 0 0 4px #0f172a",
     swatchBorder: "border-slate-500",
     swatchShadow:
       "0 0 0 1px rgba(248, 250, 252, 0.36), inset 0 0 0 1px rgba(2, 6, 23, 0.72)",
@@ -113,9 +208,8 @@ export const SETTINGS_THEME_CLASSES: Record<
     mutedText: "text-xs text-slate-600",
     primaryText: "text-slate-900",
     rootText: "text-slate-900",
-    selectedSwatchBorder: "border-sky-600",
-    selectedSwatchShadow:
-      "inset 0 0 0 2px #2563eb, inset 0 0 0 3px rgba(255, 255, 255, 0.72)",
+    selectedSwatchBorder: "border-transparent",
+    selectedSwatchShadow: "inset 0 0 0 2px #ffffff, inset 0 0 0 4px #0f172a",
     swatchBorder: "border-slate-500",
     swatchShadow:
       "0 0 0 1px rgba(15, 23, 42, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.64)",
@@ -141,9 +235,14 @@ export const getColorSwatchStyle = ({
   };
 };
 
-const QUICK_SWATCHES = QUICK_SWATCH_TOKENS.map((token) =>
-  TAILWIND_COLOR_SWATCHES.find((swatch) => swatch.token === token),
-).filter(Boolean) as typeof TAILWIND_COLOR_SWATCHES;
+export const getQuickSwatchesForRole = (
+  role: ThemeColorRole,
+): TailwindColorSwatch[] =>
+  QUICK_SWATCH_TOKENS_BY_ROLE[role]
+    .map((token) =>
+      TAILWIND_COLOR_SWATCHES.find((swatch) => swatch.token === token),
+    )
+    .filter((swatch): swatch is TailwindColorSwatch => !!swatch);
 
 const getBrowserPrefersDark = (): boolean =>
   typeof window !== "undefined" && typeof window.matchMedia === "function"
@@ -404,6 +503,7 @@ export const createThemeSettingsComponent = ({
       const isDefaultValue = !settings.overrides[id];
       const isCustomDropdownOpen = customColorRole === id;
       const draftHex = resolveColorValue(draftValue) || storedHex;
+      const quickSwatches = getQuickSwatchesForRole(id);
 
       return (
         <div className="grid gap-2 py-3" key={id}>
@@ -432,14 +532,15 @@ export const createThemeSettingsComponent = ({
 
           <div className="flex items-center gap-1">
             <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto p-px">
-              {QUICK_SWATCHES.map((swatch) => {
+              {quickSwatches.map((swatch) => {
                 const selected =
                   resolveColorValue(storedValue)?.toLowerCase() ===
                   swatch.hex.toLowerCase();
                 return (
                   <button
                     aria-label={`Use ${swatch.label}`}
-                    className={`h-6 w-6 shrink-0 overflow-hidden rounded border ${
+                    aria-pressed={selected}
+                    className={`relative h-6 w-6 shrink-0 overflow-hidden rounded border ${
                       selected
                         ? themeClasses.selectedSwatchBorder
                         : themeClasses.swatchBorder
@@ -455,7 +556,19 @@ export const createThemeSettingsComponent = ({
                     })}
                     title={swatch.label}
                     type="button"
-                  />
+                  >
+                    {selected ? (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm font-bold leading-none text-white"
+                        style={{
+                          textShadow: "0 1px 2px #000000, 0 0 2px #000000",
+                        }}
+                      >
+                        ✓
+                      </span>
+                    ) : null}
+                  </button>
                 );
               })}
             </div>

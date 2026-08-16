@@ -2,9 +2,15 @@ import { expect, test } from "@playwright/test";
 import {
   areAllColorGroupsExpanded,
   getColorGroupExpansionState,
+  getQuickSwatchesForRole,
   getColorSwatchStyle,
+  QUICK_SWATCH_TOKENS_BY_ROLE,
   SETTINGS_THEME_CLASSES,
 } from "../src/components/ThemeSettings";
+import {
+  COLOR_ROLE_DEFINITIONS,
+  getDefaultColorValue,
+} from "../src/theme/palette";
 
 const groupedRoles = [
   ["Surfaces", []],
@@ -75,8 +81,34 @@ test("uses scheme-specific swatch outlines without changing swatch colors", () =
     }),
   ).toMatchObject({
     backgroundColor: "#020617",
-    boxShadow:
-      "inset 0 0 0 2px #38bdf8, inset 0 0 0 3px rgba(15, 23, 42, 0.72)",
+    boxShadow: "inset 0 0 0 2px #ffffff, inset 0 0 0 4px #0f172a",
+  });
+});
+
+test("offers quick swatches suited to each color role", () => {
+  expect(QUICK_SWATCH_TOKENS_BY_ROLE.appBackground).toContain("slate-950");
+  expect(QUICK_SWATCH_TOKENS_BY_ROLE.codeSurface).toContain("slate-950");
+  expect(QUICK_SWATCH_TOKENS_BY_ROLE.primaryText).toEqual(
+    expect.arrayContaining(["slate-50", "slate-100", "slate-300"]),
+  );
+  expect(QUICK_SWATCH_TOKENS_BY_ROLE.primaryText).not.toContain("slate-950");
+  expect(QUICK_SWATCH_TOKENS_BY_ROLE.accent).toEqual(
+    expect.arrayContaining(["sky-400", "blue-400", "cyan-300", "violet-300"]),
+  );
+  expect(QUICK_SWATCH_TOKENS_BY_ROLE.bullet).toEqual(
+    expect.arrayContaining(["slate-300", "slate-400", "sky-400"]),
+  );
+  expect(QUICK_SWATCH_TOKENS_BY_ROLE.highlight).toContain("amber-300");
+});
+
+test("resolves eight valid quick swatches for every color role", () => {
+  COLOR_ROLE_DEFINITIONS.forEach(({ id }) => {
+    const quickSwatches = getQuickSwatchesForRole(id);
+
+    expect(quickSwatches).toHaveLength(8);
+    expect(quickSwatches.map(({ token }) => token)).toContain(
+      getDefaultColorValue({ role: id }),
+    );
   });
 });
 
