@@ -2,17 +2,22 @@ import runExtension from "roamjs-components/util/runExtension";
 import { render as renderToast } from "roamjs-components/components/Toast";
 import { createThemeSettingsDrawerController } from "~/components/ThemeSettingsDrawer";
 import { createThemeRuntime } from "~/theme/runtime";
-import { readThemeSettings } from "~/utils/settings";
+import { readThemeSettings, toggleThemeModeSettings } from "~/utils/settings";
 
 const OPEN_SETTINGS_COMMAND = "Custom Dark Theme: Open Settings";
+const TOGGLE_DARK_MODE_COMMAND = "Custom Dark Theme: Toggle Dark Mode";
+const COMMAND_LABELS = [OPEN_SETTINGS_COMMAND, TOGGLE_DARK_MODE_COMMAND];
 
 export default runExtension(async ({ extensionAPI }) => {
-  const initialSettings = readThemeSettings({ extensionAPI });
-  const themeRuntime = createThemeRuntime({ initialSettings });
+  let currentSettings = readThemeSettings({ extensionAPI });
+  const themeRuntime = createThemeRuntime({ initialSettings: currentSettings });
   const settingsDrawer = createThemeSettingsDrawerController({
     extensionAPI,
-    initialSettings,
-    onSettingsChange: themeRuntime.update,
+    initialSettings: currentSettings,
+    onSettingsChange: (settings) => {
+      currentSettings = settings;
+      themeRuntime.update(settings);
+    },
   });
 
   extensionAPI.settings.panel.create({
@@ -38,6 +43,20 @@ export default runExtension(async ({ extensionAPI }) => {
     })
     .catch(() => undefined);
 
+  void extensionAPI.ui.commandPalette
+    .addCommand({
+      label: TOGGLE_DARK_MODE_COMMAND,
+      callback: () => {
+        currentSettings = toggleThemeModeSettings({
+          extensionAPI,
+          settings: currentSettings,
+        });
+        themeRuntime.update(currentSettings);
+        settingsDrawer.updateSettings(currentSettings);
+      },
+    })
+    .catch(() => undefined);
+
   if (process.env.NODE_ENV === "development") {
     renderToast({
       id: "custom-dark-theme-loaded",
@@ -49,9 +68,11 @@ export default runExtension(async ({ extensionAPI }) => {
 
   return {
     unload: () => {
-      void extensionAPI.ui.commandPalette
-        .removeCommand({ label: OPEN_SETTINGS_COMMAND })
-        .catch(() => undefined);
+      COMMAND_LABELS.forEach((label) => {
+        void extensionAPI.ui.commandPalette
+          .removeCommand({ label })
+          .catch(() => undefined);
+      });
       settingsDrawer.unload();
       themeRuntime.unload();
     },

@@ -69,18 +69,45 @@ body.${THEME_CLASS},
 }
 
 .${THEME_CLASS} .rm-topbar,
-.${THEME_CLASS} .top-row,
+.${THEME_CLASS} .top-row {
+  background-color: ${color("elevatedSurface")} !important;
+  color: ${color("primaryText")} !important;
+  border-color: ${color("border")} !important;
+}
+
 .${THEME_CLASS} .rm-reference-main,
+.${THEME_CLASS} .rm-reference-wrapper,
 .${THEME_CLASS} .rm-reference-item,
 .${THEME_CLASS} .rm-inline-references,
 .${THEME_CLASS} .rm-embed-container--block,
 .${THEME_CLASS} .rm-embed--page,
 .${THEME_CLASS} .rm-embed-container,
+.${THEME_CLASS} .rm-reference-main__child-wrapper,
+.${THEME_CLASS} .rm-nested-refs,
 .${THEME_CLASS} .rm-block-children,
-.${THEME_CLASS} .rm-block__children {
-  background-color: ${color("elevatedSurface")} !important;
+.${THEME_CLASS} .rm-block__children,
+.${THEME_CLASS} .rm-block__self,
+.${THEME_CLASS} .rm-block-main,
+.${THEME_CLASS} .rm-block--ghost,
+.${THEME_CLASS} .rm-level-margin,
+.${THEME_CLASS} .roam-block-container,
+.${THEME_CLASS} #block-input-ghost {
+  background-color: transparent !important;
   color: ${color("primaryText")} !important;
   border-color: ${color("border")} !important;
+}
+
+.${THEME_CLASS} .rm-multibar,
+.${THEME_CLASS} .rm-multibar .rm-multibar {
+  background-color: transparent !important;
+}
+
+.${THEME_CLASS} .roam-body-main .roam-article .rm-reference-main .rm-reference-item {
+  background-color: color-mix(
+    in srgb,
+    ${color("elevatedSurface")} 45%,
+    ${color("mainSurface")}
+  ) !important;
 }
 
 .${THEME_CLASS} .roam-body .roam-sidebar-container,
@@ -200,9 +227,9 @@ body.${THEME_CLASS},
 .${THEME_CLASS} .bp3-select select,
 .${THEME_CLASS} .rm-input,
 .${THEME_CLASS} #find-or-create-input,
-.${THEME_CLASS} #all-pages-search,
-.${THEME_CLASS} textarea.rm-block-input,
-.${THEME_CLASS} textarea,
+.${THEME_CLASS} .rm-settings-panel textarea,
+.${THEME_CLASS} .bp3-dialog textarea,
+.${THEME_CLASS} .bp3-popover-content textarea,
 .${THEME_CLASS} input {
   background-color: ${color("inputSurface")} !important;
   color: ${color("primaryText")} !important;
@@ -212,11 +239,24 @@ body.${THEME_CLASS},
 
 .${THEME_CLASS} .bp3-input:focus,
 .${THEME_CLASS} .bp3-select select:focus,
-.${THEME_CLASS} textarea.rm-block-input:focus,
-.${THEME_CLASS} textarea:focus,
+.${THEME_CLASS} .rm-settings-panel textarea:focus,
+.${THEME_CLASS} .bp3-dialog textarea:focus,
+.${THEME_CLASS} .bp3-popover-content textarea:focus,
 .${THEME_CLASS} input:focus {
   border-color: ${color("accent")} !important;
   box-shadow: 0 0 0 1px ${color("accent")} !important;
+}
+
+.${THEME_CLASS} .rm-title-display textarea,
+.${THEME_CLASS} textarea.rm-block-input,
+.${THEME_CLASS} textarea.rm-block-input:focus,
+.${THEME_CLASS} .rm-block-input,
+.${THEME_CLASS} .rm-block-input:focus,
+.${THEME_CLASS} .rm-block__input,
+.${THEME_CLASS} .rm-block__input:focus {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 .${THEME_CLASS} .bp3-popover-content,
@@ -229,9 +269,25 @@ body.${THEME_CLASS},
 .${THEME_CLASS} .rm-settings-panel,
 .${THEME_CLASS} .rm-settings-panel__contents,
 .${THEME_CLASS} .rm-modal-portal--settings,
+.${THEME_CLASS} .rm-settings,
+.${THEME_CLASS} .rm-extensions-marketplace,
 .${THEME_CLASS} .rm-extension-small {
   background-color: ${color("popoverSurface")} !important;
   color: ${color("primaryText")} !important;
+  border-color: ${color("border")} !important;
+}
+
+.${THEME_CLASS} .rm-settings-tabs,
+.${THEME_CLASS} .rm-extensions-marketplace-details {
+  background-color: transparent !important;
+  color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-settings .bp3-tab-list,
+.${THEME_CLASS} .rm-settings-tabs > .bp3-tab-list,
+.${THEME_CLASS} .rm-extensions-marketplace-search {
+  background-color: ${color("sidebarSurface")} !important;
+  color: ${color("secondaryText")} !important;
   border-color: ${color("border")} !important;
 }
 
@@ -244,11 +300,31 @@ body.${THEME_CLASS},
 
 .${THEME_CLASS} .bp3-menu-item.bp3-active,
 .${THEME_CLASS} .bp3-menu-item.bp3-intent-primary,
-.${THEME_CLASS} .rm-autocomplete-result:hover,
-.${THEME_CLASS} .rm-autocomplete-result.selected,
 .${THEME_CLASS} .rm-settings__tab[aria-selected="true"] {
   background-color: ${color("selectedSurface")} !important;
   color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-autocomplete-result:hover,
+.${THEME_CLASS} .rm-autocomplete-result.selected {
+  background-color: ${color("hoverSurface")} !important;
+  color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-autocomplete-result:hover *,
+.${THEME_CLASS} .rm-autocomplete-result.selected * {
+  color: inherit !important;
+}
+
+.${THEME_CLASS} .rm-find-or-create__menu .bp3-menu-item.bp3-active,
+.${THEME_CLASS} .rm-find-or-create__menu .bp3-menu-item.bp3-intent-primary {
+  background-color: ${color("hoverSurface")} !important;
+  color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-find-or-create__menu .bp3-menu-item.bp3-active *,
+.${THEME_CLASS} .rm-find-or-create__menu .bp3-menu-item.bp3-intent-primary * {
+  color: inherit !important;
 }
 
 .${THEME_CLASS} .bp3-button,
@@ -266,6 +342,116 @@ body.${THEME_CLASS},
   color: ${color("appBackground")} !important;
 }
 
+.${THEME_CLASS} .bp3-button.bp3-minimal,
+.${THEME_CLASS} .bp3-button.bp3-minimal[class*="bp3-icon-"],
+.${THEME_CLASS} .bp3-button.bp3-small[class*="bp3-icon-"],
+.${THEME_CLASS} button.bp3-button[class*="bp3-icon-"],
+.${THEME_CLASS} span.bp3-button[class*="bp3-icon-"],
+.${THEME_CLASS} .bp3-button.bp3-minimal:has(.bp3-icon),
+.${THEME_CLASS} .bp3-button.bp3-small:has(.bp3-icon) {
+  background-color: transparent !important;
+  color: ${color("secondaryText")} !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.${THEME_CLASS} .bp3-button.bp3-minimal[class*="bp3-icon-"]::before,
+.${THEME_CLASS} .bp3-button.bp3-minimal[class*="bp3-icon-"]::after,
+.${THEME_CLASS} .bp3-button.bp3-small[class*="bp3-icon-"]::before,
+.${THEME_CLASS} .bp3-button.bp3-small[class*="bp3-icon-"]::after,
+.${THEME_CLASS} button.bp3-button[class*="bp3-icon-"]::before,
+.${THEME_CLASS} button.bp3-button[class*="bp3-icon-"]::after,
+.${THEME_CLASS} span.bp3-button[class*="bp3-icon-"]::before,
+.${THEME_CLASS} span.bp3-button[class*="bp3-icon-"]::after,
+.${THEME_CLASS} .bp3-button.bp3-minimal:has(.bp3-icon)::before,
+.${THEME_CLASS} .bp3-button.bp3-minimal:has(.bp3-icon)::after,
+.${THEME_CLASS} .bp3-button.bp3-small:has(.bp3-icon)::before,
+.${THEME_CLASS} .bp3-button.bp3-small:has(.bp3-icon)::after,
+.${THEME_CLASS} .bp3-button.bp3-minimal .bp3-icon,
+.${THEME_CLASS} .bp3-button.bp3-small .bp3-icon {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.${THEME_CLASS} .bp3-button.bp3-minimal:hover,
+.${THEME_CLASS} .bp3-button.bp3-minimal[class*="bp3-icon-"]:hover,
+.${THEME_CLASS} .bp3-button.bp3-small[class*="bp3-icon-"]:hover,
+.${THEME_CLASS} button.bp3-button[class*="bp3-icon-"]:hover,
+.${THEME_CLASS} span.bp3-button[class*="bp3-icon-"]:hover,
+.${THEME_CLASS} .bp3-button.bp3-minimal:has(.bp3-icon):hover,
+.${THEME_CLASS} .bp3-button.bp3-small:has(.bp3-icon):hover,
+.${THEME_CLASS} .bp3-button.bp3-minimal.bp3-active,
+.${THEME_CLASS} .bp3-button.bp3-minimal:focus,
+.${THEME_CLASS} .bp3-button.bp3-minimal:active {
+  background-color: transparent !important;
+  color: ${color("primaryText")} !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.${THEME_CLASS} .rm-settings-tabs .bp3-tab[aria-selected="true"],
+.${THEME_CLASS} .rm-settings__tab[aria-selected="true"] {
+  background-color: ${color("selectedSurface")} !important;
+  color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-settings-tabs .bp3-tab[aria-selected="true"] *,
+.${THEME_CLASS} .rm-settings__tab[aria-selected="true"] * {
+  color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-modal-dialog--find-or-create,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-header,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-header__search-bar,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-main,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-body-col,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-body,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-body__list,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-footer {
+  background-color: ${color("popoverSurface")} !important;
+  color: ${color("primaryText")} !important;
+  border-color: ${color("border")} !important;
+}
+
+.${THEME_CLASS} .rm-modal-dialog--find-or-create #rm-find-or-create-modal-input,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create #rm-find-or-create-modal-input:focus {
+  background-color: transparent !important;
+  color: ${color("primaryText")} !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-header__left-icon,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .bp3-icon {
+  color: ${color("mutedText")} !important;
+}
+
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-header .bp3-button,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-footer__action,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-footer__actions,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-footer__action-hotkey,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-footer__action-hotkey-icon {
+  background-color: transparent !important;
+  color: ${color("secondaryText")} !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-body__list .bp3-menu-item,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-row {
+  background-color: transparent !important;
+  color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-body__list .bp3-menu-item:hover,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-body__list .bp3-menu-item.bp3-active,
+.${THEME_CLASS} .rm-modal-dialog--find-or-create .rm-find-or-create-modal-body__list .bp3-menu-item.bp3-intent-primary {
+  background-color: ${color("hoverSurface")} !important;
+  color: ${color("primaryText")} !important;
+}
+
 .${THEME_CLASS} code,
 .${THEME_CLASS} pre,
 .${THEME_CLASS} .rm-code-block,
@@ -276,23 +462,46 @@ body.${THEME_CLASS},
   border-color: ${color("border")} !important;
 }
 
-.${THEME_CLASS} .rm-embed-container,
-.${THEME_CLASS} .rm-embed-container .rm-embed-container,
-.${THEME_CLASS} .rm-inline-reference,
-.${THEME_CLASS} .rm-inline-references,
-.${THEME_CLASS} .rm-reference-main__child-wrapper,
-.${THEME_CLASS} .rm-nested-refs {
-  background-color: ${color("embedSurface")} !important;
+.${THEME_CLASS} .rm-inline-reference {
+  background-color: transparent !important;
   color: ${color("secondaryText")} !important;
   border-color: ${color("border")} !important;
 }
 
-.${THEME_CLASS} .rm-pages-row,
-.${THEME_CLASS} #rm-all-pages-column-titles,
+.${THEME_CLASS} .rm-settings-panel__setting,
+.${THEME_CLASS} .rm-settings-panel__section,
+.${THEME_CLASS} .rm-settings-panel__section-wrapper,
+.${THEME_CLASS} .rm-settings-panel__hotkeys,
+.${THEME_CLASS} .rm-settings-panel__content,
+.${THEME_CLASS} .rm-settings-panel__tab-content,
+.${THEME_CLASS} .rm-settings-panel__setting-container,
+.${THEME_CLASS} .rm-user-settings,
+.${THEME_CLASS} .rm-graph-settings,
+.${THEME_CLASS} .rm-extensions-settings,
+.${THEME_CLASS} .rm-extensions-installed,
+.${THEME_CLASS} .rm-extensions-installed__header,
+.${THEME_CLASS} .rm-extension-installed,
+.${THEME_CLASS} .rm-extension,
+.${THEME_CLASS} .rm-extension-small,
+.${THEME_CLASS} .rm-extension-list-item,
+.${THEME_CLASS} .rm-extension-row,
+.${THEME_CLASS} .rm-extensions-marketplace-search__settings,
+.${THEME_CLASS} .rm-extensions-marketplace-search__results {
+  background-color: transparent !important;
+}
+
 .${THEME_CLASS} .rm-pages-title-col,
 .${THEME_CLASS} .rm-pages-checkbox-col,
+.${THEME_CLASS} .rm-pages-col,
+.${THEME_CLASS} .rm-pages-row {
+  background-color: transparent !important;
+  color: ${color("secondaryText")} !important;
+  border-color: ${color("border")} !important;
+}
+
+.${THEME_CLASS} #rm-all-pages-column-titles,
 .${THEME_CLASS} .rm-pages-row-header {
-  background-color: ${color("mainSurface")} !important;
+  background-color: ${color("elevatedSurface")} !important;
   color: ${color("secondaryText")} !important;
   border-color: ${color("border")} !important;
 }

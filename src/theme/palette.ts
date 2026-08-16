@@ -38,7 +38,7 @@ export const COLOR_ROLE_DEFINITIONS: ThemeColorRoleDefinition[] = [
     id: "inputSurface",
     label: "Input surface",
     group: "Surfaces",
-    description: "Inputs, textareas, and editable block fields.",
+    description: "Search fields, settings inputs, and form controls.",
   },
   {
     id: "popoverSurface",
@@ -207,7 +207,7 @@ export const resolveThemePalette = ({
 }: {
   preset?: ThemePresetId;
   overrides?: ThemePaletteOverrides;
-}): ThemePalette =>
+} = {}): ThemePalette =>
   THEME_COLOR_ROLES.reduce<ThemePalette>((palette, role) => {
     const defaultValue = getDefaultColorValue({ preset, role });
     const overrideValue = overrides[role];

@@ -2,6 +2,8 @@ export const THEME_MODE_VALUES = ["dark", "auto", "off"] as const;
 
 export type ThemeMode = (typeof THEME_MODE_VALUES)[number];
 
+export type ThemeColorScheme = "dark" | "light";
+
 export const THEME_PRESET_VALUES = ["default"] as const;
 
 export type ThemePresetId = (typeof THEME_PRESET_VALUES)[number];

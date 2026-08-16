@@ -8,9 +8,16 @@
     "start": "samepage dev",
     "prebuild:roam": "npm install",
     "build:roam": "samepage build --dry",
-    "test": "samepage test"
+    "test": "samepage test",
+    "typecheck": "tsc --noEmit"
   },
-  "keywords": ["roam", "roam-research", "roamjs", "dark-theme", "theme"],
+  "keywords": [
+    "roam",
+    "roam-research",
+    "roamjs",
+    "dark-theme",
+    "theme"
+  ],
   "license": "MIT",
   "dependencies": {
     "roamjs-components": "^0.86.4"
