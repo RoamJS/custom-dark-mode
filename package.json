@@ -9,6 +9,7 @@
     "prebuild:roam": "npm install",
     "build:roam": "samepage build --dry",
     "test": "samepage test",
+    "test:ui-full": "node scripts/full-ui-test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
@@ -27,6 +28,7 @@
     "roamjs-components": "^0.86.4"
   },
   "devDependencies": {
+    "playwright-runtime": "npm:playwright@^1.62.1",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.6.11"
   },

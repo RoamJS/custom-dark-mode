@@ -17,6 +17,7 @@ const cssVariableNames: Record<ThemeColorRole, string> = {
   accentHover: "--cdt-accent-hover",
   pageReference: "--cdt-page-reference",
   blockReference: "--cdt-block-reference",
+  blockReferenceUnderline: "--cdt-block-reference-underline",
   border: "--cdt-border",
   hoverSurface: "--cdt-hover-surface",
   selectedSurface: "--cdt-selected-surface",
@@ -184,6 +185,11 @@ body.${THEME_CLASS},
 .${THEME_CLASS} .rm-block__ref-count,
 .${THEME_CLASS} .rm-reference-item .rm-page-ref {
   color: ${color("blockReference")} !important;
+}
+
+.${THEME_CLASS} .rm-block-ref,
+.${THEME_CLASS} .rm-block-ref:hover {
+  border-bottom-color: ${color("blockReferenceUnderline")} !important;
 }
 
 .${THEME_CLASS} .rm-tag,
@@ -398,6 +404,15 @@ body.${THEME_CLASS},
   box-shadow: none !important;
 }
 
+.${THEME_CLASS} #roamjs-custom-dark-theme-settings-root .roamjs-custom-dark-theme-color-group-header.bp3-button.bp3-minimal {
+  background: ${color("elevatedSurface")} !important;
+  border-color: ${color("border")} !important;
+}
+
+.${THEME_CLASS} #roamjs-custom-dark-theme-settings-root .roamjs-custom-dark-theme-color-group-header.bp3-button.bp3-minimal:hover {
+  background: ${color("hoverSurface")} !important;
+}
+
 .${THEME_CLASS} .rm-settings-tabs .bp3-tab[aria-selected="true"],
 .${THEME_CLASS} .rm-settings__tab[aria-selected="true"] {
   background-color: ${color("selectedSurface")} !important;
@@ -474,6 +489,39 @@ body.${THEME_CLASS},
   background-color: transparent !important;
   color: ${color("secondaryText")} !important;
   border-color: ${color("border")} !important;
+}
+
+.${THEME_CLASS} .rm-graph-view {
+  background-color: ${color("appBackground")} !important;
+  color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-graph-view-control-panel {
+  background-color: ${color("popoverSurface")} !important;
+  color: ${color("primaryText")} !important;
+  border: 1px solid ${color("border")} !important;
+  box-shadow: 0 8px 24px ${transparent("appBackground", 55)} !important;
+}
+
+.${THEME_CLASS} .rm-graph-view-control-panel__top-bar,
+.${THEME_CLASS} .rm-graph-view-control-panel__top-bar strong {
+  color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-graph-view-control-panel__main-options,
+.${THEME_CLASS} .rm-graph-view-control-panel__main-options .bp3-control {
+  color: ${color("secondaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-graph-view-control-panel__main-options .bp3-button {
+  background-color: ${color("inputSurface")} !important;
+  color: ${color("primaryText")} !important;
+  border-color: ${color("border")} !important;
+}
+
+.${THEME_CLASS} #rm-canvas-container canvas.sigma-labels,
+.${THEME_CLASS} #rm-canvas-container canvas.sigma-edgeLabels {
+  filter: invert(1) hue-rotate(180deg);
 }
 
 .${THEME_CLASS} .rm-settings-panel__setting,

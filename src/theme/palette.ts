@@ -89,6 +89,12 @@ export const COLOR_ROLE_DEFINITIONS: ThemeColorRoleDefinition[] = [
     description: "Block references and inline reference links.",
   },
   {
+    id: "blockReferenceUnderline",
+    label: "Block ref underline",
+    group: "Links",
+    description: "Underline border beneath inline block references.",
+  },
+  {
     id: "border",
     label: "Borders",
     group: "States",
@@ -134,7 +140,35 @@ export const COLOR_ROLE_DEFINITIONS: ThemeColorRoleDefinition[] = [
 
 export const DEFAULT_THEME_PRESET: ThemePreset = {
   id: "default",
-  name: "Default",
+  name: "GitHub Primer",
+  palette: {
+    appBackground: "#010409",
+    mainSurface: "#0d1117",
+    sidebarSurface: "#161b22",
+    elevatedSurface: "#161b22",
+    inputSurface: "#0d1117",
+    popoverSurface: "#161b22",
+    primaryText: "#e6edf3",
+    secondaryText: "#b1bac4",
+    mutedText: "#848d97",
+    accent: "#2f81f7",
+    accentHover: "#58a6ff",
+    pageReference: "#2f81f7",
+    blockReference: "#e6edf3",
+    blockReferenceUnderline: "#30363d",
+    border: "#30363d",
+    hoverSurface: "#21262d",
+    selectedSurface: "#1158c7",
+    highlight: "#e3b341",
+    codeSurface: "#010409",
+    embedSurface: "#161b22",
+    bullet: "#848d97",
+  },
+};
+
+export const INITIAL_LEGACY_THEME_PRESET: ThemePreset = {
+  id: "initial-legacy",
+  name: "Original theme (Legacy)",
   palette: {
     appBackground: "slate-950",
     mainSurface: "slate-900",
@@ -149,6 +183,7 @@ export const DEFAULT_THEME_PRESET: ThemePreset = {
     accentHover: "sky-300",
     pageReference: "sky-300",
     blockReference: "cyan-300",
+    blockReferenceUnderline: "slate-700",
     border: "slate-700",
     hoverSurface: "slate-700",
     selectedSurface: "blue-900",
@@ -161,7 +196,13 @@ export const DEFAULT_THEME_PRESET: ThemePreset = {
 
 export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
   default: DEFAULT_THEME_PRESET,
+  "initial-legacy": INITIAL_LEGACY_THEME_PRESET,
 };
+
+export const THEME_PRESET_OPTIONS: ThemePreset[] = [
+  DEFAULT_THEME_PRESET,
+  INITIAL_LEGACY_THEME_PRESET,
+];
 
 const THREE_DIGIT_HEX = /^#?([a-f0-9])([a-f0-9])([a-f0-9])$/i;
 const SIX_DIGIT_HEX = /^#?([a-f0-9]{6})$/i;

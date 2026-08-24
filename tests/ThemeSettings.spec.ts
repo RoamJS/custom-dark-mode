@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import {
   areAllColorGroupsExpanded,
+  COLOR_TOOLBAR_STYLE,
+  getColorGroupHeaderStyle,
   getColorGroupExpansionState,
   getQuickSwatchesForRole,
   getColorSwatchStyle,
@@ -95,6 +97,9 @@ test("offers quick swatches suited to each color role", () => {
   expect(QUICK_SWATCH_TOKENS_BY_ROLE.accent).toEqual(
     expect.arrayContaining(["sky-400", "blue-400", "cyan-300", "violet-300"]),
   );
+  expect(QUICK_SWATCH_TOKENS_BY_ROLE.blockReferenceUnderline).toEqual(
+    expect.arrayContaining(["slate-700", "slate-500", "gray-700"]),
+  );
   expect(QUICK_SWATCH_TOKENS_BY_ROLE.bullet).toEqual(
     expect.arrayContaining(["slate-300", "slate-400", "sky-400"]),
   );
@@ -106,8 +111,15 @@ test("resolves eight valid quick swatches for every color role", () => {
     const quickSwatches = getQuickSwatchesForRole(id);
 
     expect(quickSwatches).toHaveLength(8);
+  });
+});
+
+test("keeps every original theme default available as a quick swatch", () => {
+  COLOR_ROLE_DEFINITIONS.forEach(({ id }) => {
+    const quickSwatches = getQuickSwatchesForRole(id);
+
     expect(quickSwatches.map(({ token }) => token)).toContain(
-      getDefaultColorValue({ role: id }),
+      getDefaultColorValue({ preset: "initial-legacy", role: id }),
     );
   });
 });
@@ -119,4 +131,32 @@ test("uses filled color group headers in both schemes", () => {
   expect(SETTINGS_THEME_CLASSES.light.groupHeader).not.toContain(
     "border-slate-200",
   );
+
+  expect(
+    getColorGroupHeaderStyle({
+      colorScheme: "dark",
+      settings: { mode: "dark", overrides: {}, preset: "default" },
+    }),
+  ).toMatchObject({
+    backgroundColor: "#161b22",
+    borderColor: "#30363d",
+  });
+  expect(
+    getColorGroupHeaderStyle({
+      colorScheme: "light",
+      settings: { mode: "off", overrides: {}, preset: "default" },
+    }),
+  ).toMatchObject({
+    backgroundColor: "#f1f5f9",
+    borderColor: "transparent",
+  });
+});
+
+test("keeps Reset all and Expand all in one stable toolbar row", () => {
+  expect(COLOR_TOOLBAR_STYLE).toMatchObject({
+    display: "flex",
+    flexWrap: "nowrap",
+    gap: 8,
+    justifyContent: "flex-end",
+  });
 });
