@@ -410,12 +410,7 @@ const loadExtension = async (page) => {
         "#roamjs-custom-dark-theme-settings-root",
       ).length,
     }));
-    if (
-      loadState.htmlThemeClass &&
-      loadState.bodyThemeClass &&
-      loadState.styles >= 1 &&
-      loadState.roots >= 1
-    ) {
+    if (loadState.roots >= 1) {
       return row;
     }
   }
@@ -458,15 +453,31 @@ const setSidebarState = async ({ page, leftOpen, rightOpen }) => {
 
 const populateRightSidebar = async ({ page, pageUids }) => {
   await uiAction("Populate right sidebar with three page windows", () =>
-    page.evaluate((uids) => {
+    page.evaluate(async (uids) => {
       const sidebar = window.roamAlphaAPI.ui.rightSidebar;
       for (const windowState of sidebar.getWindows()) {
-        sidebar.removeWindow({ window: windowState });
+        const blockUid =
+          windowState["block-uid"] ||
+          windowState["page-uid"] ||
+          windowState["mentions-uid"];
+        await sidebar.removeWindow({
+          window:
+            windowState.type === "search-query"
+              ? {
+                  type: windowState.type,
+                  "search-query-str":
+                    windowState["search-query-str"] ||
+                    windowState["search-query-uid"],
+                }
+              : { type: windowState.type, "block-uid": blockUid },
+        });
       }
       for (const uid of uids) {
-        sidebar.addWindow({ window: { type: "outline", "block-uid": uid } });
+        await sidebar.addWindow({
+          window: { type: "outline", "block-uid": uid },
+        });
       }
-      sidebar.open();
+      await sidebar.open();
     }, pageUids),
   );
   await page.waitForFunction(
@@ -475,6 +486,96 @@ const populateRightSidebar = async ({ page, pageUids }) => {
     { timeout },
   );
   await page.waitForTimeout(500);
+};
+
+const snapshotRightSidebar = (page) =>
+  page.evaluate(() => ({
+    windows: window.roamAlphaAPI.ui.rightSidebar.getWindows(),
+    isOpen: Boolean(
+      document.querySelector(
+        ".rm-article-wrapper.rm-spacing--right-sidebar-open",
+      ),
+    ),
+  }));
+
+const restoreRightSidebar = async ({ page, snapshot }) => {
+  if (!snapshot) {
+    return { attempted: false, succeeded: true, windows: [] };
+  }
+
+  const restoration = await page.evaluate(async ({ windows, isOpen }) => {
+    const sidebar = window.roamAlphaAPI.ui.rightSidebar;
+    const toWindowInput = (windowState) => {
+      if (windowState.type === "search-query") {
+        return {
+          type: windowState.type,
+          "search-query-str":
+            windowState["search-query-str"] || windowState["search-query-uid"],
+          order: windowState.order,
+        };
+      }
+      return {
+        type: windowState.type,
+        "block-uid":
+          windowState["block-uid"] ||
+          windowState["page-uid"] ||
+          windowState["mentions-uid"],
+        order: windowState.order,
+      };
+    };
+    for (const windowState of sidebar.getWindows()) {
+      await sidebar.removeWindow({ window: toWindowInput(windowState) });
+    }
+    for (const windowState of windows) {
+      const windowInput = toWindowInput(windowState);
+      await sidebar.addWindow({ window: windowInput });
+      if (windowState["pinned?"]) {
+        await sidebar.pinWindow({ window: windowInput, "pin-to-top?": true });
+      }
+      if (windowState["collapsed?"]) {
+        await sidebar.collapseWindow({ window: windowInput });
+      }
+      await sidebar.setWindowOrder({ window: windowInput });
+    }
+    await sidebar[isOpen ? "open" : "close"]();
+
+    const restoredWindows = sidebar.getWindows();
+    const signature = (windowState) => ({
+      type: windowState.type,
+      blockUid: windowState["block-uid"] || null,
+      pageUid: windowState["page-uid"] || null,
+      searchQuery:
+        windowState["search-query-str"] ||
+        windowState["search-query-uid"] ||
+        null,
+      order: windowState.order,
+      collapsed: Boolean(windowState["collapsed?"]),
+      pinned: Boolean(windowState["pinned?"]),
+    });
+    return {
+      expectedWindows: windows.map(signature),
+      restoredWindows: restoredWindows.map(signature),
+      expectedOpen: isOpen,
+    };
+  }, snapshot);
+  await page.waitForTimeout(250);
+  const restoredOpen = await page.evaluate(() =>
+    Boolean(
+      document.querySelector(
+        ".rm-article-wrapper.rm-spacing--right-sidebar-open",
+      ),
+    ),
+  );
+
+  return {
+    attempted: true,
+    succeeded:
+      JSON.stringify(restoration.expectedWindows) ===
+        JSON.stringify(restoration.restoredWindows) &&
+      restoration.expectedOpen === restoredOpen,
+    ...restoration,
+    restoredOpen,
+  };
 };
 
 const openScratchAutocomplete = async ({ page, blockUid, text, label }) => {
@@ -512,6 +613,37 @@ const drawer = (page) =>
 
 const modeSelect = (page) => drawer(page).locator("select").first();
 
+const normalizeThemeSettings = async (page) => {
+  await runCommand(page, "Custom Dark Mode: Open Settings");
+  await drawer(page).waitFor({ timeout });
+  await select(modeSelect(page), "dark", "Normalize theme mode to Dark");
+  const resetAllButton = drawer(page).getByRole("button", {
+    name: "Reset all",
+  });
+  if (await resetAllButton.isVisible()) {
+    await click(resetAllButton, "Clear saved palette overrides");
+  }
+  await select(
+    drawer(page).locator("select").nth(1),
+    "default",
+    "Normalize theme preset to GitHub Primer",
+  );
+  await click(
+    drawer(page).getByRole("button", {
+      name: "Close Custom Dark Mode settings",
+    }),
+    "Close normalized theme settings",
+  );
+  await page.waitForFunction(
+    () =>
+      document.documentElement.classList.contains("roamjs-custom-dark-theme") &&
+      document.querySelectorAll("#roamjs-custom-dark-theme-styles").length ===
+        1,
+    null,
+    { timeout },
+  );
+};
+
 const roleContainer = (page, roleName) =>
   drawer(page)
     .getByText(roleName, { exact: true })
@@ -523,12 +655,32 @@ const createFixture = async (page) => {
   const suffix = Date.now().toString(36);
   const sourceTitle = `CDT Full UI Test ${suffix}`;
   const referenceTitle = `CDT Full UI Reference ${suffix}`;
+  const auxiliaryTitles = {
+    tag: `${sourceTitle} Tag`,
+    pageReference: `${sourceTitle} Page Reference`,
+    queryA: "ex-A",
+    queryB: "ex-B",
+  };
   const fixture = await page.evaluate(
-    ({ sourceTitle: source, referenceTitle: reference }) => {
+    ({ sourceTitle: source, referenceTitle: reference, auxiliaryTitles }) => {
       const api = window.roamAlphaAPI;
+      const auxiliaryPages = Object.fromEntries(
+        Object.entries(auxiliaryTitles).map(([key, title]) => {
+          const existingPage = api.pull("[:block/uid]", [":node/title", title]);
+          return [
+            key,
+            {
+              title,
+              uid: existingPage?.[":block/uid"] || api.util.generateUID(),
+              createdByTest: !existingPage,
+            },
+          ];
+        }),
+      );
       return {
         sourceTitle: source,
         referenceTitle: reference,
+        auxiliaryPages,
         sourceUid: api.util.generateUID(),
         referenceUid: api.util.generateUID(),
         targetBlockUid: api.util.generateUID(),
@@ -550,7 +702,7 @@ const createFixture = async (page) => {
         ),
       };
     },
-    { sourceTitle, referenceTitle },
+    { sourceTitle, referenceTitle, auxiliaryTitles },
   );
 
   try {
@@ -559,6 +711,7 @@ const createFixture = async (page) => {
       const {
         sourceTitle: source,
         referenceTitle: reference,
+        auxiliaryPages,
         sourceUid,
         referenceUid,
         targetBlockUid,
@@ -609,6 +762,15 @@ const createFixture = async (page) => {
       await api.data.page.create({
         page: { title: reference, uid: referenceUid },
       });
+      for (const auxiliaryPage of Object.values(auxiliaryPages)) {
+        if (!auxiliaryPage.createdByTest) continue;
+        await api.data.page.create({
+          page: {
+            title: auxiliaryPage.title,
+            uid: auxiliaryPage.uid,
+          },
+        });
+      }
       for (const [index, uid] of sidebarPageUids.entries()) {
         await api.data.page.create({
           page: { title: `${source} Sidebar ${index + 1}`, uid },
@@ -666,7 +828,7 @@ const createFixture = async (page) => {
       await createBlock({
         parentUid: sourceUid,
         order: 7,
-        string: `Semantic links: [[${reference}]], #[[theme-test-tag]], ((${targetBlockUid})), [external link](https://github.com), [page alias]([[${reference}]]), and [block alias](((${targetBlockUid}))).`,
+        string: `Semantic links: [[${reference}]], #[[${auxiliaryPages.tag.title}]], ((${targetBlockUid})), [external link](https://github.com), [page alias]([[${reference}]]), and [block alias](((${targetBlockUid}))).`,
       });
       await createBlock({
         parentUid: sourceUid,
@@ -681,8 +843,7 @@ const createFixture = async (page) => {
       await createBlock({
         parentUid: targetBlockUid,
         order: 1,
-        string:
-          "Second embedded child line with **bold** and [[theme-test-tag]]",
+        string: `Second embedded child line with **bold** and [[${auxiliaryPages.tag.title}]]`,
       });
       await createBlock({
         parentUid: sourceUid,
@@ -711,7 +872,7 @@ const createFixture = async (page) => {
         parentUid: sourceUid,
         order: 13,
         uid: quoteUid,
-        string: "> A block quote with [[theme-test-tag]] and `inline code`.",
+        string: `> A block quote with [[${auxiliaryPages.tag.title}]] and \`inline code\`.`,
       });
       await createBlock({
         parentUid: sourceUid,
@@ -743,7 +904,9 @@ const createFixture = async (page) => {
             string: "First nested list item",
             children: [
               { string: "Second-level item" },
-              { string: "Another second-level item with a [[page reference]]" },
+              {
+                string: `Another second-level item with a [[${auxiliaryPages.pageReference.title}]]`,
+              },
             ],
           },
           { string: "Second nested list item" },
@@ -752,12 +915,12 @@ const createFixture = async (page) => {
       await createBlock({
         parentUid: sourceUid,
         order: 20,
-        string: "Query result alpha #[[ex-A]] #[[ex-B]]",
+        string: `Query result alpha #[[${auxiliaryPages.queryA.title}]] #[[${auxiliaryPages.queryB.title}]]`,
       });
       await createBlock({
         parentUid: sourceUid,
         order: 21,
-        string: "Query result beta #[[ex-A]] #[[ex-B]]",
+        string: `Query result beta #[[${auxiliaryPages.queryA.title}]] #[[${auxiliaryPages.queryB.title}]]`,
       });
       await createBlock({
         parentUid: sourceUid,
@@ -821,7 +984,7 @@ const createFixture = async (page) => {
         location: { "parent-uid": sourceUid, order: 1 },
         block: {
           uid: contentBlockUid,
-          string: `Page ref [[${reference}]], block ref ((${targetBlockUid})), ^^highlight^^, \`inline code\`, and #[[theme-test-tag]]`,
+          string: `Page ref [[${reference}]], block ref ((${targetBlockUid})), ^^highlight^^, \`inline code\`, and #[[${auxiliaryPages.tag.title}]]`,
         },
       });
       await api.data.block.create({
@@ -854,11 +1017,17 @@ const createFixture = async (page) => {
 const deleteFixture = async (page, fixture) => {
   if (!fixture) return { attempted: false, succeeded: true, pages: [] };
   const pages = await page.evaluate(
-    async ({ sourceUid, referenceUid, sidebarPageUids }) => {
+    async ({ sourceUid, referenceUid, auxiliaryPages, sidebarPageUids }) => {
       const api = window.roamAlphaAPI;
       const targets = [
         { label: "source", uid: sourceUid },
         { label: "reference", uid: referenceUid },
+        ...Object.entries(auxiliaryPages)
+          .filter(([, page]) => page.createdByTest)
+          .map(([label, page]) => ({
+            label: `auxiliary-${label}`,
+            uid: page.uid,
+          })),
         ...sidebarPageUids.map((uid, index) => ({
           label: `right-sidebar-${index + 1}`,
           uid,
@@ -867,6 +1036,19 @@ const deleteFixture = async (page, fixture) => {
       const results = [];
       for (const target of targets) {
         try {
+          const existingPage = api.pull("[:block/uid]", [
+            ":block/uid",
+            target.uid,
+          ]);
+          if (!existingPage) {
+            results.push({
+              ...target,
+              deleted: true,
+              alreadyAbsent: true,
+              error: null,
+            });
+            continue;
+          }
           await api.data.page.delete({ page: { uid: target.uid } });
           const remainingPage = api.pull("[:block/uid]", [
             ":block/uid",
@@ -936,6 +1118,7 @@ const writeMarkdownReport = async (result) => {
     `- Recorded actions: ${result.actions.length}`,
     `- Required action delay: ${result.actionDelayMs} ms`,
     `- Fixture cleanup: ${result.fixtureCleanup.succeeded ? "PASS" : "FAIL"}`,
+    `- Right sidebar restoration: ${result.rightSidebarRestoration.succeeded ? "PASS" : "FAIL"}`,
     `- Video: ${result.videoPath || "not available"}`,
     "",
     "## Checks",
@@ -971,6 +1154,12 @@ const main = async () => {
   const video = page.video();
   let fixture = null;
   let fixtureCleanup = { attempted: false, succeeded: true, pages: [] };
+  let rightSidebarSnapshot = null;
+  let rightSidebarRestoration = {
+    attempted: false,
+    succeeded: true,
+    windows: [],
+  };
   let fatalError = null;
 
   page.on("pageerror", (error) => {
@@ -1028,7 +1217,16 @@ const main = async () => {
         timeout,
       });
     }
-    const extensionRow = await loadExtension(page);
+    await loadExtension(page);
+    await normalizeThemeSettings(page);
+    await openSettings(page);
+    await openSettingsTab(
+      page,
+      "#bp3-tab-title_rm-settings-tabs_rm-depot-tab",
+      "Roam Depot after theme normalization",
+    );
+    const extensionRow = findExtensionRow(page);
+    await extensionRow.waitFor({ timeout });
     const loadedScreenshot = await capture({
       page,
       name: "01-extension-loaded",
@@ -1078,6 +1276,7 @@ const main = async () => {
     });
 
     fixture = await createFixture(page);
+    rightSidebarSnapshot = await snapshotRightSidebar(page);
     await closeOpenOverlays(page);
     await navigate(
       page,
@@ -2414,6 +2613,20 @@ const main = async () => {
     }).catch(() => undefined);
   } finally {
     try {
+      rightSidebarRestoration = await restoreRightSidebar({
+        page,
+        snapshot: rightSidebarSnapshot,
+      });
+    } catch (error) {
+      rightSidebarRestoration = {
+        attempted: !!rightSidebarSnapshot,
+        succeeded: false,
+        windows: [],
+        error: error.message,
+      };
+      consoleErrors.push(`Right sidebar restoration failed: ${error.message}`);
+    }
+    try {
       fixtureCleanup = await deleteFixture(page, fixture);
     } catch (error) {
       fixtureCleanup = {
@@ -2449,6 +2662,7 @@ const main = async () => {
         summary.failed === 0 &&
         pageErrors.length === 0 &&
         fixtureCleanup.succeeded &&
+        rightSidebarRestoration.succeeded &&
         actions.every(({ status }) => status === "passed"),
       graphUrl: DEFAULT_GRAPH_URL,
       repoDir,
@@ -2464,6 +2678,7 @@ const main = async () => {
       knownWarnings,
       infrastructureIssues,
       fixtureCleanup,
+      rightSidebarRestoration,
       fatalError: fatalError?.stack || null,
       completedAt: new Date().toISOString(),
     };
