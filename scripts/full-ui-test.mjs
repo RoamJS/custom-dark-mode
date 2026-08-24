@@ -1,14 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-
-// Evidence is generated under ignored local/ storage while this runner remains tracked.
-import {
-  DEFAULT_GRAPH_URL,
-  loadChromium,
-  waitForRoamReady,
-} from "/Users/michaelgartner/Areas/RoamJS/skills/roamjs-playwright-session/scripts/roam-session.mjs";
+import { chromium } from "playwright-runtime";
 
 const repoDir = process.cwd();
+const DEFAULT_GRAPH_URL =
+  process.env.ROAM_GRAPH_URL || "https://roamresearch.com/#/app/jarvis-sandbox";
 const outDir = path.join(repoDir, "local", "full-ui-test", "latest");
 const screenshotDir = path.join(outDir, "screenshots");
 const videoDir = path.join(outDir, "video");
@@ -17,6 +13,11 @@ const timeout = 45_000;
 const actionDelayMs = 215;
 const viewport = { width: 1440, height: 1000 };
 const extensionName = "custom-dark-theme";
+const readySelectors = [
+  ".roam-app",
+  ".roam-body",
+  'input[placeholder="Find or Create Page"]',
+];
 
 const rootFiles = [
   { name: "extension.js", required: true, type: "text/javascript" },
@@ -50,6 +51,25 @@ const infrastructureIssues = [
 ];
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const waitForRoamReady = async ({ page, profileDir, timeout }) => {
+  await page.waitForTimeout(1500);
+  const isSignin =
+    page.url().includes("/signin") ||
+    page.url().includes("#/signin") ||
+    (await page.locator('input[type="password"]').count()) > 0;
+  if (isSignin) {
+    throw new Error(
+      `Roam profile is not logged in or the session expired (${profileDir}). Refresh the cached profile, then rerun the suite.`,
+    );
+  }
+  await page.waitForFunction(
+    (selectors) =>
+      selectors.some((selector) => document.querySelector(selector)),
+    readySelectors,
+    { timeout },
+  );
+};
 
 const slug = (value) =>
   value
@@ -885,8 +905,8 @@ const main = async () => {
   await fs.mkdir(screenshotDir, { recursive: true });
   await fs.mkdir(videoDir, { recursive: true });
 
-  const chromium = await loadChromium();
   const context = await chromium.launchPersistentContext(profileDir, {
+    channel: process.env.PLAYWRIGHT_CHANNEL || "chrome",
     headless: true,
     viewport,
     recordVideo: { dir: videoDir, size: viewport },
