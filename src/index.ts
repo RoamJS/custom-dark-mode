@@ -4,8 +4,8 @@ import { createThemeSettingsDrawerController } from "~/components/ThemeSettingsD
 import { createThemeRuntime } from "~/theme/runtime";
 import { readThemeSettings, toggleThemeModeSettings } from "~/utils/settings";
 
-const OPEN_SETTINGS_COMMAND = "Custom Dark Theme: Open Settings";
-const TOGGLE_DARK_MODE_COMMAND = "Custom Dark Theme: Toggle Dark Mode";
+const OPEN_SETTINGS_COMMAND = "Custom Dark Mode: Open Settings";
+const TOGGLE_DARK_MODE_COMMAND = "Custom Dark Mode: Toggle Dark Mode";
 const COMMAND_LABELS = [OPEN_SETTINGS_COMMAND, TOGGLE_DARK_MODE_COMMAND];
 
 export default runExtension(async ({ extensionAPI }) => {
@@ -21,15 +21,15 @@ export default runExtension(async ({ extensionAPI }) => {
   });
 
   extensionAPI.settings.panel.create({
-    tabTitle: "Custom Dark Theme",
+    tabTitle: "Custom Dark Mode",
     settings: [
       {
         id: "custom-dark-theme-settings",
         name: "Settings",
-        description: "Open the custom dark theme sidebar.",
+        description: "Open Custom Dark Mode settings.",
         action: {
           type: "button",
-          content: "Open Theme Sidebar",
+          content: "Open Settings",
           onClick: () => settingsDrawer.open(),
         },
       },
@@ -60,7 +60,7 @@ export default runExtension(async ({ extensionAPI }) => {
   if (process.env.NODE_ENV === "development") {
     renderToast({
       id: "custom-dark-theme-loaded",
-      content: "Successfully loaded Custom Dark Theme",
+      content: "Successfully loaded Custom Dark Mode",
       intent: "success",
       timeout: 500,
     });

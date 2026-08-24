@@ -13,6 +13,7 @@
 
 ### Fixed
 
+- Renamed the extension to Custom Dark Mode throughout its commands, settings, notifications, package metadata, and documentation.
 - Kept theme drawer controls usable when the drawer is opened over Roam Settings.
 - Tailored quick color swatches to each theme role and made the selected swatch clear with a high-contrast outline and checkmark.
 - Added a small inset around quick color swatches so their borders remain fully visible.

@@ -488,7 +488,7 @@ const openScratchAutocomplete = async ({ page, blockUid, text, label }) => {
 };
 
 const drawer = (page) =>
-  page.locator('aside[aria-label="Custom Dark Theme settings"]');
+  page.locator('aside[aria-label="Custom Dark Mode settings"]');
 
 const modeSelect = (page) => drawer(page).locator("select").first();
 
@@ -852,7 +852,7 @@ const contrastRatio = (foreground, background) => {
 
 const writeMarkdownReport = async (result) => {
   const lines = [
-    "# Custom Dark Theme full UI test",
+    "# Custom Dark Mode full UI test",
     "",
     `- Result: **${result.ok ? "PASS" : "FAIL"}**`,
     `- Graph: ${result.graphUrl}`,
@@ -1523,7 +1523,7 @@ const main = async () => {
       },
     });
 
-    await runCommand(page, "Custom Dark Theme: Open Settings");
+    await runCommand(page, "Custom Dark Mode: Open Settings");
     await drawer(page).waitFor({ timeout });
     const drawerDarkScreenshot = await capture({
       page,
@@ -1617,7 +1617,7 @@ const main = async () => {
             .trim(),
           drawerBackground: getComputedStyle(
             document.querySelector(
-              'aside[aria-label="Custom Dark Theme settings"]',
+              'aside[aria-label="Custom Dark Mode settings"]',
             ),
           ).backgroundColor,
         }));
@@ -1629,7 +1629,7 @@ const main = async () => {
             .trim(),
           drawerBackground: getComputedStyle(
             document.querySelector(
-              'aside[aria-label="Custom Dark Theme settings"]',
+              'aside[aria-label="Custom Dark Mode settings"]',
             ),
           ).backgroundColor,
         }));
@@ -1644,11 +1644,11 @@ const main = async () => {
       },
     });
 
-    const palette = await openCommandPalette(page, "Custom Dark Theme");
+    const palette = await openCommandPalette(page, "Custom Dark Mode");
     const commandScreenshot = await capture({
       page,
       name: "05-command-palette-actions",
-      label: "Both Custom Dark Theme command palette actions",
+      label: "Both Custom Dark Mode command palette actions",
       locator: palette,
     });
     await check({
@@ -1659,10 +1659,10 @@ const main = async () => {
           .split("\n")
           .map((line) => line.trim());
         const openCount = lines.filter(
-          (line) => line === "Custom Dark Theme: Open Settings",
+          (line) => line === "Custom Dark Mode: Open Settings",
         ).length;
         const toggleCount = lines.filter(
-          (line) => line === "Custom Dark Theme: Toggle Dark Mode",
+          (line) => line === "Custom Dark Mode: Toggle Dark Mode",
         ).length;
         return {
           passed: openCount === 1 && toggleCount === 1,
@@ -1672,7 +1672,7 @@ const main = async () => {
     });
     await press(page, "Escape", "Close command palette");
     if ((await drawer(page).count()) === 0) {
-      await runCommand(page, "Custom Dark Theme: Open Settings");
+      await runCommand(page, "Custom Dark Mode: Open Settings");
       await drawer(page).waitFor({ timeout });
     }
 
@@ -1947,7 +1947,7 @@ const main = async () => {
       test: () =>
         page.evaluate(() => {
           const aside = document.querySelector(
-            'aside[aria-label="Custom Dark Theme settings"]',
+            'aside[aria-label="Custom Dark Mode settings"]',
           );
           return {
             passed:
@@ -2015,7 +2015,7 @@ const main = async () => {
     });
 
     await select(modeSelect(page), "auto", "Switch theme mode Auto");
-    await runCommand(page, "Custom Dark Theme: Toggle Dark Mode");
+    await runCommand(page, "Custom Dark Mode: Toggle Dark Mode");
     await check({
       name: "Toggle Dark Mode changes Auto to Off",
       test: async () => ({
@@ -2023,7 +2023,7 @@ const main = async () => {
         details: { mode: await modeSelect(page).inputValue() },
       }),
     });
-    await runCommand(page, "Custom Dark Theme: Toggle Dark Mode");
+    await runCommand(page, "Custom Dark Mode: Toggle Dark Mode");
     await check({
       name: "Toggle Dark Mode restores Auto after Off",
       test: async () => ({
@@ -2032,7 +2032,7 @@ const main = async () => {
       }),
     });
     await select(modeSelect(page), "dark", "Switch theme mode Dark");
-    await runCommand(page, "Custom Dark Theme: Toggle Dark Mode");
+    await runCommand(page, "Custom Dark Mode: Toggle Dark Mode");
     await check({
       name: "Toggle Dark Mode changes Dark to Off",
       test: async () => ({
@@ -2040,7 +2040,7 @@ const main = async () => {
         details: { mode: await modeSelect(page).inputValue() },
       }),
     });
-    await runCommand(page, "Custom Dark Theme: Toggle Dark Mode");
+    await runCommand(page, "Custom Dark Mode: Toggle Dark Mode");
     const toggleScreenshot = await capture({
       page,
       name: "14-toggle-restored-dark",
@@ -2063,10 +2063,10 @@ const main = async () => {
           .count()
           .then((count) => count === 0),
     });
-    await runCommand(page, "Custom Dark Theme: Open Settings");
+    await runCommand(page, "Custom Dark Mode: Open Settings");
     await click(
       drawer(page).getByRole("button", {
-        name: "Close Custom Dark Theme settings",
+        name: "Close Custom Dark Mode settings",
       }),
       "Close settings drawer with Close button",
     );
