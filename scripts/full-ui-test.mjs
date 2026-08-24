@@ -426,7 +426,7 @@ const loadExtension = async (page) => {
 };
 
 const openCommandPalette = async (page, query) => {
-  await press(page, "Meta+p", "Open command palette");
+  await press(page, "ControlOrMeta+p", "Open command palette");
   const palette = page.locator(".rm-command-palette");
   await palette.waitFor({ timeout });
   const input = palette.locator("input").first();
