@@ -7,16 +7,18 @@ import type {
   ThemeColorRole,
   ThemeMode,
   ThemePaletteOverrides,
+  ThemePresetId,
   ThemeSettings,
 } from "~/types/theme";
 import { THEME_MODE_VALUES } from "~/types/theme";
 import {
   COLOR_ROLE_DEFINITIONS,
-  DEFAULT_THEME_PRESET,
   getDefaultColorHex,
   getDefaultColorValue,
   normalizeHexColor,
   resolveColorValue,
+  resolveThemePalette,
+  THEME_PRESET_OPTIONS,
 } from "~/theme/palette";
 import { getThemeColorScheme } from "~/theme/colorScheme";
 import {
@@ -37,6 +39,13 @@ type ThemeSettingsComponentDependencies = {
 type ColorRoleGroup = [string, typeof COLOR_ROLE_DEFINITIONS];
 
 export type ColorGroupExpansionState = Record<string, boolean>;
+
+export const COLOR_TOOLBAR_STYLE: CSSProperties = {
+  display: "flex",
+  flexWrap: "nowrap",
+  gap: 8,
+  justifyContent: "flex-end",
+};
 
 type SettingsThemeClasses = {
   colorInput: string;
@@ -235,6 +244,31 @@ export const getColorSwatchStyle = ({
   };
 };
 
+export const getColorGroupHeaderStyle = ({
+  colorScheme,
+  settings,
+}: {
+  colorScheme: ThemeColorScheme;
+  settings: ThemeSettings;
+}): CSSProperties => {
+  if (colorScheme === "light") {
+    return {
+      backgroundColor: "#f1f5f9",
+      borderColor: "transparent",
+      boxShadow: "none",
+    };
+  }
+
+  const palette = resolveThemePalette({
+    overrides: settings.overrides,
+    preset: settings.preset,
+  });
+  return {
+    backgroundColor: palette.elevatedSurface,
+    borderColor: palette.border,
+  };
+};
+
 export const getQuickSwatchesForRole = (
   role: ThemeColorRole,
 ): TailwindColorSwatch[] =>
@@ -345,6 +379,13 @@ export const createThemeSettingsComponent = ({
 
     const setMode = (mode: ThemeMode): void => {
       commitSettings({ ...settings, mode });
+    };
+
+    const setPreset = (preset: ThemePresetId): void => {
+      const nextSettings = { ...settings, preset };
+      setInvalidRoles({});
+      setDraftColors(getDraftColorValues(nextSettings));
+      commitSettings(nextSettings);
     };
 
     const setDraftColor = ({
@@ -662,15 +703,23 @@ export const createThemeSettingsComponent = ({
           </label>
           <label className="flex flex-col gap-1">
             <span className="font-medium">Theme</span>
-            <select className="bp3-input" disabled value={settings.preset}>
-              <option value={DEFAULT_THEME_PRESET.id}>
-                {DEFAULT_THEME_PRESET.name}
-              </option>
+            <select
+              className="bp3-input"
+              onChange={(event) =>
+                setPreset(event.target.value as ThemePresetId)
+              }
+              value={settings.preset}
+            >
+              {THEME_PRESET_OPTIONS.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.name}
+                </option>
+              ))}
             </select>
           </label>
         </div>
 
-        <div className="grid grid-cols-[80px_auto] justify-end gap-2">
+        <div style={COLOR_TOOLBAR_STYLE}>
           <Button
             className={hasPaletteOverrides ? "" : "invisible"}
             disabled={!hasPaletteOverrides}
@@ -695,12 +744,13 @@ export const createThemeSettingsComponent = ({
               <Button
                 alignText="left"
                 aria-expanded={isExpanded}
-                className={themeClasses.groupHeader}
+                className={`roamjs-custom-dark-theme-color-group-header ${themeClasses.groupHeader}`}
                 fill
                 icon={isExpanded ? "chevron-down" : "chevron-right"}
                 large
                 minimal
                 onClick={() => toggleGroup({ group, roles })}
+                style={getColorGroupHeaderStyle({ colorScheme, settings })}
                 text={
                   <span
                     className={`text-base font-semibold ${themeClasses.primaryText}`}

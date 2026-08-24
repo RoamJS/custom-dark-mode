@@ -398,6 +398,15 @@ body.${THEME_CLASS},
   box-shadow: none !important;
 }
 
+.${THEME_CLASS} #roamjs-custom-dark-theme-settings-root .roamjs-custom-dark-theme-color-group-header.bp3-button.bp3-minimal {
+  background: ${color("elevatedSurface")} !important;
+  border-color: ${color("border")} !important;
+}
+
+.${THEME_CLASS} #roamjs-custom-dark-theme-settings-root .roamjs-custom-dark-theme-color-group-header.bp3-button.bp3-minimal:hover {
+  background: ${color("hoverSurface")} !important;
+}
+
 .${THEME_CLASS} .rm-settings-tabs .bp3-tab[aria-selected="true"],
 .${THEME_CLASS} .rm-settings__tab[aria-selected="true"] {
   background-color: ${color("selectedSurface")} !important;

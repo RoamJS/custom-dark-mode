@@ -12,7 +12,7 @@
 ## Features
 
 - Dark, Auto, and Off modes
-- A curated default palette for Roam surfaces, text, links, states, and content
+- GitHub Primer as the default palette, a WCAG AA Tailwind interpretation, and the original theme as a legacy preset
 - Quick color swatches, Tailwind color tokens, and custom hex values
 - Per-user settings that do not write to `roam/css`
 - Command palette actions for opening settings and quickly toggling the theme
@@ -27,11 +27,11 @@ Choose a mode:
 - **Auto** applies it when your browser or operating system prefers a dark color scheme.
 - **Off** removes the custom theme and restores Roam's normal appearance.
 
-Expand a color group to customize individual roles with a suggested swatch, a Tailwind color token such as `slate-900`, or a hex value such as `#0f172a`. Use **Reset all** to return every color to the default palette.
+Choose **GitHub Primer** for the exact GitHub-inspired palette, **GitHub Primer Tailwind** for a WCAG AA interpretation built entirely from the included Tailwind color tokens, or **Original theme (Legacy)** for the extension's initial palette. Expand a color group to customize individual roles with a suggested swatch, a Tailwind color token such as `slate-900`, or a hex value such as `#0f172a`. Use **Reset all** to return every color to the selected preset.
 
 Run **Custom Dark Theme: Toggle Dark Mode** from the command palette to switch between Off and your previously selected Dark or Auto mode.
 
 ## Roadmap
 
-- Preset themes drawn from the theme-design mockups: black, gray, terminal, monochrome (black and white), and Ubuntu
+- More preset themes drawn from the theme-design mockups: black, gray, terminal, monochrome (black and white), and Ubuntu
 - Save and load your own custom themes

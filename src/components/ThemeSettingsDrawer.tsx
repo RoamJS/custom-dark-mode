@@ -4,6 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { createThemeSettingsComponent } from "~/components/ThemeSettings";
 import { getThemeColorScheme } from "~/theme/colorScheme";
+import { resolveThemePalette } from "~/theme/palette";
 import type { RoamExtensionApi } from "~/types/roam";
 import type { ThemeColorScheme, ThemeSettings } from "~/types/theme";
 
@@ -53,8 +54,8 @@ const DRAWER_BASE_STYLE: CSSProperties = {
 
 export const DARK_DRAWER_STYLE: CSSProperties = {
   ...DRAWER_BASE_STYLE,
-  backgroundColor: "#0f172a",
-  color: "#f1f5f9",
+  backgroundColor: "#0d1117",
+  color: "#e6edf3",
 };
 
 export const LIGHT_DRAWER_STYLE: CSSProperties = {
@@ -65,10 +66,24 @@ export const LIGHT_DRAWER_STYLE: CSSProperties = {
 
 export const getDrawerStyle = ({
   colorScheme,
+  settings,
 }: {
   colorScheme: ThemeColorScheme;
-}): CSSProperties =>
-  colorScheme === "light" ? LIGHT_DRAWER_STYLE : DARK_DRAWER_STYLE;
+  settings?: ThemeSettings;
+}): CSSProperties => {
+  if (colorScheme === "light") return LIGHT_DRAWER_STYLE;
+  if (!settings) return DARK_DRAWER_STYLE;
+
+  const palette = resolveThemePalette({
+    overrides: settings.overrides,
+    preset: settings.preset,
+  });
+  return {
+    ...DARK_DRAWER_STYLE,
+    backgroundColor: palette.mainSurface,
+    color: palette.primaryText,
+  };
+};
 
 export const DRAWER_HEADER_STYLE: CSSProperties = {
   alignItems: "center",
@@ -89,7 +104,7 @@ export const DRAWER_BODY_STYLE: CSSProperties = {
 };
 
 const DRAWER_CLASS_NAMES: Record<ThemeColorScheme, string> = {
-  dark: "bp3-dark bg-slate-900 text-slate-100 shadow-2xl",
+  dark: "bp3-dark shadow-2xl",
   light: "bg-white text-slate-900 shadow-2xl",
 };
 
@@ -151,7 +166,7 @@ export const createThemeSettingsDrawerController = ({
       <aside
         aria-label="Custom Dark Theme settings"
         className={DRAWER_CLASS_NAMES[colorScheme]}
-        style={getDrawerStyle({ colorScheme })}
+        style={getDrawerStyle({ colorScheme, settings: currentSettings })}
       >
         <header
           className={DRAWER_HEADER_CLASS_NAMES[colorScheme]}

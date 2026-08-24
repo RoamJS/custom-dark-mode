@@ -72,3 +72,10 @@ You are creating a Roam Research extension.
 
 - Write unit tests for new functionality.
 - Ensure tests are meaningful and maintainable.
+
+### Theme visual verification
+
+- For every default-palette, preset, theme-token, or broad CSS-selector change, build the extension and run `npm run test:ui-full` in the real logged-in Roam sandbox graph.
+- Keep the tracked `scripts/full-ui-test.mjs` runner comprehensive and preserve its generated screenshots, video, report, and manifest under `local/full-ui-test/latest/`.
+- Use deterministic fixture content instead of private graph content. Do not capture credentials, tokens, cookies, account secrets, or unrelated displays.
+- When a new Roam surface or supported extension surface is discovered, add it directly to the browser runner so coverage grows over time.

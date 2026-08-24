@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
 import {
   getToggledThemeMode,
+  readThemeSettings,
   THEME_LAST_ENABLED_MODE_SETTING_KEY,
   THEME_MODE_SETTING_KEY,
+  THEME_PRESET_SETTING_KEY,
   toggleThemeModeSettings,
 } from "../src/utils/settings";
 import type { ThemeSettings } from "../src/types/theme";
@@ -53,4 +55,28 @@ test("restores auto mode when auto was selected before off", () => {
   });
   expect(autoSettings.mode).toBe("auto");
   expect(store[THEME_MODE_SETTING_KEY]).toBe("auto");
+});
+
+test("reads the original legacy preset from the existing preset setting", () => {
+  const store: SettingsStore = {
+    [THEME_PRESET_SETTING_KEY]: "initial-legacy",
+  };
+
+  expect(
+    readThemeSettings({ extensionAPI: createExtensionApi(store) }),
+  ).toEqual({
+    mode: "dark",
+    overrides: {},
+    preset: "initial-legacy",
+  });
+});
+
+test("reads the GitHub Primer Tailwind preset", () => {
+  const store: SettingsStore = {
+    [THEME_PRESET_SETTING_KEY]: "github-primer-tailwind",
+  };
+
+  expect(
+    readThemeSettings({ extensionAPI: createExtensionApi(store) }),
+  ).toMatchObject({ preset: "github-primer-tailwind" });
 });

@@ -9,6 +9,7 @@
     "prebuild:roam": "npm install",
     "build:roam": "samepage build --dry",
     "test": "samepage test",
+    "test:ui-full": "node scripts/full-ui-test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

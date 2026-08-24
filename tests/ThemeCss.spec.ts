@@ -218,4 +218,10 @@ test("does not paint content containers as inset surfaces", () => {
   background-color: var(--cdt-elevated-surface) !important;
 }`);
   expect(css).not.toContain(".roamjs-custom-dark-theme #all-pages-search,\n");
+  expect(css).toContain(
+    `.roamjs-custom-dark-theme #roamjs-custom-dark-theme-settings-root .roamjs-custom-dark-theme-color-group-header.bp3-button.bp3-minimal {
+  background: var(--cdt-elevated-surface) !important;
+  border-color: var(--cdt-border) !important;
+}`,
+  );
 });

@@ -4,7 +4,11 @@ export type ThemeMode = (typeof THEME_MODE_VALUES)[number];
 
 export type ThemeColorScheme = "dark" | "light";
 
-export const THEME_PRESET_VALUES = ["default"] as const;
+export const THEME_PRESET_VALUES = [
+  "default",
+  "github-primer-tailwind",
+  "initial-legacy",
+] as const;
 
 export type ThemePresetId = (typeof THEME_PRESET_VALUES)[number];
 
