@@ -660,6 +660,15 @@ const createFixture = async (page) => {
     pageReference: `${sourceTitle} Page Reference`,
     queryA: "ex-A",
     queryB: "ex-B",
+    callout: ">",
+    noteCallout: "!NOTE",
+    embed: "embed",
+    embedPath: "embed-path",
+    query: "query",
+    search: "search",
+    table: "table",
+    slider: "slider",
+    kanban: "kanban",
   };
   const fixture = await page.evaluate(
     ({ sourceTitle: source, referenceTitle: reference, auxiliaryTitles }) => {
