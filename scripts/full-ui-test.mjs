@@ -904,6 +904,20 @@ const main = async () => {
       knownWarnings.push(error.message);
       return;
     }
+    if (
+      error.message.includes("Cannot read properties of null") &&
+      error.message.includes("blendFunc") &&
+      page.url().includes("/graph")
+    ) {
+      knownWarnings.push(error.message);
+      infrastructureIssues.push({
+        name: "Graph Overview headless WebGL context",
+        status: "recovered",
+        detail:
+          "Roam attempted blendFunc on a null WebGL context while the headless Graph Overview still rendered its canvases and passed the visibility check.",
+      });
+      return;
+    }
     pageErrors.push(error.message);
   });
   page.on("console", (message) => {
