@@ -2308,19 +2308,69 @@ const main = async () => {
       ".roam-body-main, canvas",
       "Open Graph Overview",
     );
-    await capture({
+    const graphScreenshot = await capture({
       page,
       name: "19-graph-overview",
       label: "Graph Overview under the custom dark theme",
     });
     await check({
-      name: "Graph Overview remains visible under the theme",
-      test: async () => ({
-        passed:
-          (await page.locator("canvas, .roam-graph").count()) > 0 &&
-          (await page.locator(".roam-body-main").isVisible()),
-        details: { canvasCount: await page.locator("canvas").count() },
-      }),
+      name: "Graph Overview controls and canvas labels remain readable under the theme",
+      screenshot: graphScreenshot,
+      test: () =>
+        page
+          .evaluate(() => {
+            const panel = document.querySelector(
+              ".rm-graph-view-control-panel",
+            );
+            const title = panel?.querySelector(
+              ".rm-graph-view-control-panel__top-bar strong",
+            );
+            const controls = Array.from(
+              panel?.querySelectorAll(
+                ".rm-graph-view-control-panel__main-options .bp3-control",
+              ) || [],
+            );
+            const labelCanvases = Array.from(
+              document.querySelectorAll(
+                "#rm-canvas-container canvas.sigma-labels, #rm-canvas-container canvas.sigma-edgeLabels",
+              ),
+            );
+            const panelStyles = panel ? getComputedStyle(panel) : null;
+            const panelBackground = panelStyles?.backgroundColor || "";
+            const titleColor = title ? getComputedStyle(title).color : "";
+            const controlColors = controls.map(
+              (control) => getComputedStyle(control).color,
+            );
+            const canvasFilters = labelCanvases.map(
+              (canvas) => getComputedStyle(canvas).filter,
+            );
+
+            return {
+              panelVisible: Boolean(
+                panel && panel.getBoundingClientRect().width > 0,
+              ),
+              panelBackground,
+              titleColor,
+              controlColors,
+              labelCanvasCount: labelCanvases.length,
+              canvasFilters,
+            };
+          })
+          .then((values) => ({
+            passed:
+              values.panelVisible &&
+              !isTransparent(values.panelBackground) &&
+              values.panelBackground !== "rgb(255, 255, 255)" &&
+              contrastRatio(values.titleColor, values.panelBackground) >= 4.5 &&
+              values.controlColors.length >= 2 &&
+              values.controlColors.every(
+                (controlColor) =>
+                  contrastRatio(controlColor, values.panelBackground) >= 4.5,
+              ) &&
+              values.labelCanvasCount >= 1 &&
+              values.canvasFilters.every((filter) => filter !== "none"),
+            details: values,
+          })),
     });
 
     await navigate(

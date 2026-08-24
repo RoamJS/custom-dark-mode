@@ -9,6 +9,10 @@
 - Added a separate block-reference underline color control, using each preset's border color by default.
 - Expanded the full Roam UI visual test with a rich-content gallery, both sidebars, native queries and tables, graph and help menus, autocomplete and context menus, tooltips, toasts, and additional native components.
 
+### Fixed
+
+- Made Graph Overview labels and controls readable against dark theme surfaces.
+
 ## 1.0.0 - 2026-07-01
 
 ### Fixed

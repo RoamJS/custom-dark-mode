@@ -2,6 +2,23 @@ import { expect, test } from "@playwright/test";
 import { buildThemeCss } from "../src/theme/css";
 import { resolveThemePalette } from "../src/theme/palette";
 
+test("themes the native Graph Overview controls and label canvases", () => {
+  const css = buildThemeCss(resolveThemePalette());
+
+  expect(css)
+    .toContain(`.roamjs-custom-dark-theme .rm-graph-view-control-panel {
+  background-color: var(--cdt-popover-surface) !important;
+  color: var(--cdt-primary-text) !important;
+  border: 1px solid var(--cdt-border) !important;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--cdt-app-background) 55%, transparent) !important;
+}`);
+  expect(css)
+    .toContain(`.roamjs-custom-dark-theme #rm-canvas-container canvas.sigma-labels,
+.roamjs-custom-dark-theme #rm-canvas-container canvas.sigma-edgeLabels {
+  filter: invert(1) hue-rotate(180deg);
+}`);
+});
+
 test("does not paint content containers as inset surfaces", () => {
   const css = buildThemeCss(resolveThemePalette());
 

@@ -491,6 +491,39 @@ body.${THEME_CLASS},
   border-color: ${color("border")} !important;
 }
 
+.${THEME_CLASS} .rm-graph-view {
+  background-color: ${color("appBackground")} !important;
+  color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-graph-view-control-panel {
+  background-color: ${color("popoverSurface")} !important;
+  color: ${color("primaryText")} !important;
+  border: 1px solid ${color("border")} !important;
+  box-shadow: 0 8px 24px ${transparent("appBackground", 55)} !important;
+}
+
+.${THEME_CLASS} .rm-graph-view-control-panel__top-bar,
+.${THEME_CLASS} .rm-graph-view-control-panel__top-bar strong {
+  color: ${color("primaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-graph-view-control-panel__main-options,
+.${THEME_CLASS} .rm-graph-view-control-panel__main-options .bp3-control {
+  color: ${color("secondaryText")} !important;
+}
+
+.${THEME_CLASS} .rm-graph-view-control-panel__main-options .bp3-button {
+  background-color: ${color("inputSurface")} !important;
+  color: ${color("primaryText")} !important;
+  border-color: ${color("border")} !important;
+}
+
+.${THEME_CLASS} #rm-canvas-container canvas.sigma-labels,
+.${THEME_CLASS} #rm-canvas-container canvas.sigma-edgeLabels {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 .${THEME_CLASS} .rm-settings-panel__setting,
 .${THEME_CLASS} .rm-settings-panel__section,
 .${THEME_CLASS} .rm-settings-panel__section-wrapper,
