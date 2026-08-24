@@ -523,28 +523,60 @@ const createFixture = async (page) => {
   const suffix = Date.now().toString(36);
   const sourceTitle = `CDT Full UI Test ${suffix}`;
   const referenceTitle = `CDT Full UI Reference ${suffix}`;
-  return page.evaluate(
-    async ({ sourceTitle: source, referenceTitle: reference }) => {
+  const fixture = await page.evaluate(
+    ({ sourceTitle: source, referenceTitle: reference }) => {
       const api = window.roamAlphaAPI;
-      const sourceUid = api.util.generateUID();
-      const referenceUid = api.util.generateUID();
-      const targetBlockUid = api.util.generateUID();
-      const contentBlockUid = api.util.generateUID();
-      const richContentUid = api.util.generateUID();
-      const queryUid = api.util.generateUID();
-      const tableUid = api.util.generateUID();
-      const searchUid = api.util.generateUID();
-      const dateUid = api.util.generateUID();
-      const quoteUid = api.util.generateUID();
-      const calloutUid = api.util.generateUID();
-      const latexUid = api.util.generateUID();
-      const listsUid = api.util.generateUID();
-      const sliderUid = api.util.generateUID();
-      const kanbanUid = api.util.generateUID();
-      const scratchUid = api.util.generateUID();
-      const sidebarPageUids = Array.from({ length: 3 }, () =>
-        api.util.generateUID(),
-      );
+      return {
+        sourceTitle: source,
+        referenceTitle: reference,
+        sourceUid: api.util.generateUID(),
+        referenceUid: api.util.generateUID(),
+        targetBlockUid: api.util.generateUID(),
+        contentBlockUid: api.util.generateUID(),
+        richContentUid: api.util.generateUID(),
+        queryUid: api.util.generateUID(),
+        tableUid: api.util.generateUID(),
+        searchUid: api.util.generateUID(),
+        dateUid: api.util.generateUID(),
+        quoteUid: api.util.generateUID(),
+        calloutUid: api.util.generateUID(),
+        latexUid: api.util.generateUID(),
+        listsUid: api.util.generateUID(),
+        sliderUid: api.util.generateUID(),
+        kanbanUid: api.util.generateUID(),
+        scratchUid: api.util.generateUID(),
+        sidebarPageUids: Array.from({ length: 3 }, () =>
+          api.util.generateUID(),
+        ),
+      };
+    },
+    { sourceTitle, referenceTitle },
+  );
+
+  try {
+    await page.evaluate(async (fixture) => {
+      const api = window.roamAlphaAPI;
+      const {
+        sourceTitle: source,
+        referenceTitle: reference,
+        sourceUid,
+        referenceUid,
+        targetBlockUid,
+        contentBlockUid,
+        richContentUid,
+        queryUid,
+        tableUid,
+        searchUid,
+        dateUid,
+        quoteUid,
+        calloutUid,
+        latexUid,
+        listsUid,
+        sliderUid,
+        kanbanUid,
+        scratchUid,
+        sidebarPageUids,
+      } = fixture;
 
       const createBlock = async ({
         parentUid,
@@ -799,30 +831,24 @@ const createFixture = async (page) => {
           string: `Linked reference back to [[${source}]]`,
         },
       });
-      return {
-        sourceTitle: source,
-        referenceTitle: reference,
-        sourceUid,
-        referenceUid,
-        targetBlockUid,
-        contentBlockUid,
-        richContentUid,
-        queryUid,
-        tableUid,
-        searchUid,
-        dateUid,
-        quoteUid,
-        calloutUid,
-        latexUid,
-        listsUid,
-        sliderUid,
-        kanbanUid,
-        scratchUid,
-        sidebarPageUids,
-      };
-    },
-    { sourceTitle, referenceTitle },
-  );
+    }, fixture);
+    return fixture;
+  } catch (error) {
+    const cleanup = await deleteFixture(page, fixture).catch(
+      (cleanupError) => ({
+        attempted: true,
+        succeeded: false,
+        pages: [],
+        error: cleanupError.message,
+      }),
+    );
+    if (!cleanup.succeeded) {
+      throw new Error(
+        `Fixture creation failed: ${error.message}. Partial cleanup also failed: ${JSON.stringify(cleanup)}`,
+      );
+    }
+    throw error;
+  }
 };
 
 const deleteFixture = async (page, fixture) => {
