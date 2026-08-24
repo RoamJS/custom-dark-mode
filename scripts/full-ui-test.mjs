@@ -826,19 +826,48 @@ const createFixture = async (page) => {
 };
 
 const deleteFixture = async (page, fixture) => {
-  if (!fixture) return;
-  await page.evaluate(async ({ sourceUid, referenceUid, sidebarPageUids }) => {
-    const api = window.roamAlphaAPI;
-    await api.data.page
-      .delete({ page: { uid: sourceUid } })
-      .catch(() => undefined);
-    await api.data.page
-      .delete({ page: { uid: referenceUid } })
-      .catch(() => undefined);
-    for (const uid of sidebarPageUids) {
-      await api.data.page.delete({ page: { uid } }).catch(() => undefined);
-    }
-  }, fixture);
+  if (!fixture) return { attempted: false, succeeded: true, pages: [] };
+  const pages = await page.evaluate(
+    async ({ sourceUid, referenceUid, sidebarPageUids }) => {
+      const api = window.roamAlphaAPI;
+      const targets = [
+        { label: "source", uid: sourceUid },
+        { label: "reference", uid: referenceUid },
+        ...sidebarPageUids.map((uid, index) => ({
+          label: `right-sidebar-${index + 1}`,
+          uid,
+        })),
+      ];
+      const results = [];
+      for (const target of targets) {
+        try {
+          await api.data.page.delete({ page: { uid: target.uid } });
+          const remainingPage = api.pull("[:block/uid]", [
+            ":block/uid",
+            target.uid,
+          ]);
+          results.push({
+            ...target,
+            deleted: !remainingPage,
+            error: remainingPage ? "Page still exists after deletion" : null,
+          });
+        } catch (error) {
+          results.push({
+            ...target,
+            deleted: false,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+      return results;
+    },
+    fixture,
+  );
+  return {
+    attempted: true,
+    succeeded: pages.every(({ deleted }) => deleted),
+    pages,
+  };
 };
 
 const isTransparent = (value) =>
@@ -880,6 +909,7 @@ const writeMarkdownReport = async (result) => {
     `- Screenshots: ${result.captures.length}`,
     `- Recorded actions: ${result.actions.length}`,
     `- Required action delay: ${result.actionDelayMs} ms`,
+    `- Fixture cleanup: ${result.fixtureCleanup.succeeded ? "PASS" : "FAIL"}`,
     `- Video: ${result.videoPath || "not available"}`,
     "",
     "## Checks",
@@ -914,6 +944,7 @@ const main = async () => {
   const page = context.pages()[0] || (await context.newPage());
   const video = page.video();
   let fixture = null;
+  let fixtureCleanup = { attempted: false, succeeded: true, pages: [] };
   let fatalError = null;
 
   page.on("pageerror", (error) => {
@@ -2306,9 +2337,17 @@ const main = async () => {
       label: "Browser state when the full UI test stopped",
     }).catch(() => undefined);
   } finally {
-    await deleteFixture(page, fixture).catch((error) => {
+    try {
+      fixtureCleanup = await deleteFixture(page, fixture);
+    } catch (error) {
+      fixtureCleanup = {
+        attempted: !!fixture,
+        succeeded: false,
+        pages: [],
+        error: error.message,
+      };
       consoleErrors.push(`Fixture cleanup failed: ${error.message}`);
-    });
+    }
     await context.close();
     const temporaryVideoPath = video
       ? await video.path().catch(() => null)
@@ -2333,6 +2372,7 @@ const main = async () => {
         !fatalError &&
         summary.failed === 0 &&
         pageErrors.length === 0 &&
+        fixtureCleanup.succeeded &&
         actions.every(({ status }) => status === "passed"),
       graphUrl: DEFAULT_GRAPH_URL,
       repoDir,
@@ -2347,7 +2387,7 @@ const main = async () => {
       consoleErrors,
       knownWarnings,
       infrastructureIssues,
-      fixtureCleanup: !!fixture,
+      fixtureCleanup,
       fatalError: fatalError?.stack || null,
       completedAt: new Date().toISOString(),
     };
