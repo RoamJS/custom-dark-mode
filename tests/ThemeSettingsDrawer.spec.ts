@@ -95,18 +95,4 @@ test("uses the selected preset for dark drawer chrome", () => {
     backgroundColor: "#0f172a",
     color: "#f1f5f9",
   });
-
-  expect(
-    getDrawerStyle({
-      colorScheme: "dark",
-      settings: {
-        mode: "dark",
-        overrides: {},
-        preset: "github-primer-tailwind",
-      },
-    }),
-  ).toMatchObject({
-    backgroundColor: "#111827",
-    color: "#f1f5f9",
-  });
 });

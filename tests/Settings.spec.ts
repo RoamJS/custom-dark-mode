@@ -71,12 +71,12 @@ test("reads the original legacy preset from the existing preset setting", () => 
   });
 });
 
-test("reads the GitHub Primer Tailwind preset", () => {
+test("falls back to GitHub Primer for a removed preset", () => {
   const store: SettingsStore = {
     [THEME_PRESET_SETTING_KEY]: "github-primer-tailwind",
   };
 
   expect(
     readThemeSettings({ extensionAPI: createExtensionApi(store) }),
-  ).toMatchObject({ preset: "github-primer-tailwind" });
+  ).toMatchObject({ preset: "default" });
 });

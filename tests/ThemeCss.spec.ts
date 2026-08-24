@@ -5,6 +5,11 @@ import { resolveThemePalette } from "../src/theme/palette";
 test("does not paint content containers as inset surfaces", () => {
   const css = buildThemeCss(resolveThemePalette());
 
+  expect(css).toContain(`.roamjs-custom-dark-theme .rm-block-ref,
+.roamjs-custom-dark-theme .rm-block-ref:hover {
+  border-bottom-color: var(--cdt-block-reference-underline) !important;
+}`);
+
   expect(css).toContain(`.roamjs-custom-dark-theme .rm-reference-main,
 .roamjs-custom-dark-theme .rm-reference-wrapper,
 .roamjs-custom-dark-theme .rm-reference-item,

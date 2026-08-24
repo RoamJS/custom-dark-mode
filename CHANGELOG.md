@@ -5,7 +5,8 @@
 ### Changed
 
 - Made GitHub Primer the default theme and kept the extension's original palette available as **Original theme (Legacy)**.
-- Added a switchable **GitHub Primer Tailwind** palette using included Tailwind colors with WCAG AA text, control-border, bullet, and selected-state contrast.
+- Matched block-reference text to primary text in GitHub Primer while keeping the color independently customizable.
+- Added a separate block-reference underline color control, using each preset's border color by default.
 - Expanded the full Roam UI visual test with a rich-content gallery, both sidebars, native queries and tables, graph and help menus, autocomplete and context menus, tooltips, toasts, and additional native components.
 
 ## 1.0.0 - 2026-07-01

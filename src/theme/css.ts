@@ -17,6 +17,7 @@ const cssVariableNames: Record<ThemeColorRole, string> = {
   accentHover: "--cdt-accent-hover",
   pageReference: "--cdt-page-reference",
   blockReference: "--cdt-block-reference",
+  blockReferenceUnderline: "--cdt-block-reference-underline",
   border: "--cdt-border",
   hoverSurface: "--cdt-hover-surface",
   selectedSurface: "--cdt-selected-surface",
@@ -184,6 +185,11 @@ body.${THEME_CLASS},
 .${THEME_CLASS} .rm-block__ref-count,
 .${THEME_CLASS} .rm-reference-item .rm-page-ref {
   color: ${color("blockReference")} !important;
+}
+
+.${THEME_CLASS} .rm-block-ref,
+.${THEME_CLASS} .rm-block-ref:hover {
+  border-bottom-color: ${color("blockReferenceUnderline")} !important;
 }
 
 .${THEME_CLASS} .rm-tag,

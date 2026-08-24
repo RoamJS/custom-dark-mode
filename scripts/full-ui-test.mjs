@@ -29,7 +29,7 @@ const rootFiles = [
 const groups = [
   { name: "Surfaces", roles: 6 },
   { name: "Text", roles: 3 },
-  { name: "Links", roles: 4 },
+  { name: "Links", roles: 5 },
   { name: "States", roles: 4 },
   { name: "Content", roles: 3 },
 ];
@@ -1055,6 +1055,10 @@ const main = async () => {
             ).length,
             pageReference: read(".roam-article .rm-page-ref", "color"),
             blockReference: read(".roam-article .rm-block-ref", "color"),
+            blockReferenceUnderline: read(
+              ".roam-article .rm-block-ref",
+              "borderBottomColor",
+            ),
             highlight: read(
               ".roam-article .rm-highlight, .roam-article mark",
               "backgroundColor",
@@ -1574,7 +1578,7 @@ const main = async () => {
 
     const themeSelect = drawer(page).locator("select").nth(1);
     await check({
-      name: "Theme selector exposes both GitHub Primer palettes and the original legacy theme",
+      name: "Theme selector exposes GitHub Primer and the original legacy theme",
       test: async () => {
         const options = await themeSelect
           .locator("option")
@@ -1590,10 +1594,6 @@ const main = async () => {
             JSON.stringify([
               { label: "GitHub Primer", value: "default" },
               {
-                label: "GitHub Primer Tailwind",
-                value: "github-primer-tailwind",
-              },
-              {
                 label: "Original theme (Legacy)",
                 value: "initial-legacy",
               },
@@ -1601,81 +1601,6 @@ const main = async () => {
           details: options,
         };
       },
-    });
-
-    await select(
-      themeSelect,
-      "github-primer-tailwind",
-      "Switch to GitHub Primer Tailwind",
-    );
-    const primerTailwindScreenshot = await capture({
-      page,
-      name: "05-github-primer-tailwind",
-      label: "GitHub Primer Tailwind selected in the settings drawer",
-      locator: drawer(page),
-    });
-    await check({
-      name: "GitHub Primer Tailwind applies Tailwind tokens with WCAG AA contrast",
-      screenshot: primerTailwindScreenshot,
-      test: () =>
-        page
-          .evaluate(() => {
-            const styles = getComputedStyle(document.documentElement);
-            const values = {
-              appBackground: styles
-                .getPropertyValue("--cdt-app-background")
-                .trim(),
-              mainSurface: styles.getPropertyValue("--cdt-main-surface").trim(),
-              primaryText: styles.getPropertyValue("--cdt-primary-text").trim(),
-              pageReference: styles
-                .getPropertyValue("--cdt-page-reference")
-                .trim(),
-              border: styles.getPropertyValue("--cdt-border").trim(),
-              selectedSurface: styles
-                .getPropertyValue("--cdt-selected-surface")
-                .trim(),
-            };
-            return values;
-          })
-          .then((values) => {
-            const toRgb = (hex) => {
-              const channels = hex
-                .slice(1)
-                .match(/.{2}/g)
-                ?.map((channel) => Number.parseInt(channel, 16));
-              return channels ? `rgb(${channels.join(", ")})` : "";
-            };
-            const ratios = {
-              primaryText: contrastRatio(
-                toRgb(values.primaryText),
-                toRgb(values.mainSurface),
-              ),
-              pageReference: contrastRatio(
-                toRgb(values.pageReference),
-                toRgb(values.mainSurface),
-              ),
-              border: contrastRatio(
-                toRgb(values.border),
-                toRgb(values.mainSurface),
-              ),
-              selectedSurface: contrastRatio(
-                toRgb(values.selectedSurface),
-                toRgb(values.mainSurface),
-              ),
-            };
-            return {
-              passed:
-                values.appBackground === "#030712" &&
-                values.mainSurface === "#111827" &&
-                values.primaryText === "#f1f5f9" &&
-                values.pageReference === "#3b82f6" &&
-                ratios.primaryText >= 4.5 &&
-                ratios.pageReference >= 4.5 &&
-                ratios.border >= 3 &&
-                ratios.selectedSurface >= 3,
-              details: { ratios, values },
-            };
-          }),
     });
 
     await select(

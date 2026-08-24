@@ -127,6 +127,17 @@ const BULLET_SWATCH_TOKENS = [
   "violet-400",
 ] as const;
 
+const BORDER_SWATCH_TOKENS = [
+  "slate-800",
+  "slate-700",
+  "slate-600",
+  "slate-500",
+  "gray-700",
+  "zinc-700",
+  "neutral-700",
+  "blue-800",
+] as const;
+
 export const QUICK_SWATCH_TOKENS_BY_ROLE: Record<
   ThemeColorRole,
   readonly string[]
@@ -144,16 +155,8 @@ export const QUICK_SWATCH_TOKENS_BY_ROLE: Record<
   accentHover: LINK_SWATCH_TOKENS,
   pageReference: LINK_SWATCH_TOKENS,
   blockReference: LINK_SWATCH_TOKENS,
-  border: [
-    "slate-800",
-    "slate-700",
-    "slate-600",
-    "slate-500",
-    "gray-700",
-    "zinc-700",
-    "neutral-700",
-    "blue-800",
-  ],
+  blockReferenceUnderline: BORDER_SWATCH_TOKENS,
+  border: BORDER_SWATCH_TOKENS,
   hoverSurface: [
     "slate-900",
     "slate-800",

@@ -89,6 +89,12 @@ export const COLOR_ROLE_DEFINITIONS: ThemeColorRoleDefinition[] = [
     description: "Block references and inline reference links.",
   },
   {
+    id: "blockReferenceUnderline",
+    label: "Block ref underline",
+    group: "Links",
+    description: "Underline border beneath inline block references.",
+  },
+  {
     id: "border",
     label: "Borders",
     group: "States",
@@ -148,7 +154,8 @@ export const DEFAULT_THEME_PRESET: ThemePreset = {
     accent: "#2f81f7",
     accentHover: "#58a6ff",
     pageReference: "#2f81f7",
-    blockReference: "#79c0ff",
+    blockReference: "#e6edf3",
+    blockReferenceUnderline: "#30363d",
     border: "#30363d",
     hoverSurface: "#21262d",
     selectedSurface: "#1158c7",
@@ -156,33 +163,6 @@ export const DEFAULT_THEME_PRESET: ThemePreset = {
     codeSurface: "#010409",
     embedSurface: "#161b22",
     bullet: "#848d97",
-  },
-};
-
-export const GITHUB_PRIMER_TAILWIND_THEME_PRESET: ThemePreset = {
-  id: "github-primer-tailwind",
-  name: "GitHub Primer Tailwind",
-  palette: {
-    appBackground: "gray-950",
-    mainSurface: "gray-900",
-    sidebarSurface: "zinc-900",
-    elevatedSurface: "zinc-900",
-    inputSurface: "gray-900",
-    popoverSurface: "zinc-900",
-    primaryText: "slate-100",
-    secondaryText: "slate-300",
-    mutedText: "neutral-400",
-    accent: "blue-500",
-    accentHover: "blue-400",
-    pageReference: "blue-500",
-    blockReference: "blue-300",
-    border: "slate-500",
-    hoverSurface: "gray-800",
-    selectedSurface: "blue-600",
-    highlight: "amber-500",
-    codeSurface: "gray-950",
-    embedSurface: "zinc-900",
-    bullet: "slate-400",
   },
 };
 
@@ -203,6 +183,7 @@ export const INITIAL_LEGACY_THEME_PRESET: ThemePreset = {
     accentHover: "sky-300",
     pageReference: "sky-300",
     blockReference: "cyan-300",
+    blockReferenceUnderline: "slate-700",
     border: "slate-700",
     hoverSurface: "slate-700",
     selectedSurface: "blue-900",
@@ -215,13 +196,11 @@ export const INITIAL_LEGACY_THEME_PRESET: ThemePreset = {
 
 export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
   default: DEFAULT_THEME_PRESET,
-  "github-primer-tailwind": GITHUB_PRIMER_TAILWIND_THEME_PRESET,
   "initial-legacy": INITIAL_LEGACY_THEME_PRESET,
 };
 
 export const THEME_PRESET_OPTIONS: ThemePreset[] = [
   DEFAULT_THEME_PRESET,
-  GITHUB_PRIMER_TAILWIND_THEME_PRESET,
   INITIAL_LEGACY_THEME_PRESET,
 ];
 

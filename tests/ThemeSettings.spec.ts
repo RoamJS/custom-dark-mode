@@ -97,6 +97,9 @@ test("offers quick swatches suited to each color role", () => {
   expect(QUICK_SWATCH_TOKENS_BY_ROLE.accent).toEqual(
     expect.arrayContaining(["sky-400", "blue-400", "cyan-300", "violet-300"]),
   );
+  expect(QUICK_SWATCH_TOKENS_BY_ROLE.blockReferenceUnderline).toEqual(
+    expect.arrayContaining(["slate-700", "slate-500", "gray-700"]),
+  );
   expect(QUICK_SWATCH_TOKENS_BY_ROLE.bullet).toEqual(
     expect.arrayContaining(["slate-300", "slate-400", "sky-400"]),
   );
