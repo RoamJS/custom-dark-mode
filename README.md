@@ -36,9 +36,3 @@ Run **Custom Dark Mode: Toggle Dark Mode** from the command palette to switch be
 - More preset themes drawn from the theme-design mockups: black, gray, terminal, monochrome (black and white), and Ubuntu
 - Save and load your own custom themes
 - Preview color changes with example pages/components
-
-### Full UI verification
-
-Run `npm run build:roam` and `npm run test:ui-full` with the RoamJS session skills installed. The runner reserves a configured sandbox graph and profile through `roamjs-playwright-session`, including its stored login recovery. Set `ROAM_TEST_SLOT` to select a specific configured slot, or leave it unset for automatic selection. `ROAM_SESSION_HELPER` can point to the owning RoamJS checkout's `scripts/roam-session.mjs` when the managed skill link is unavailable.
-
-The suite uses deterministic fixtures, including a Desk comparison for expanded, childless, and collapsed bullets. Screenshots, video, and reports are saved under `local/full-ui-test/latest/`.
