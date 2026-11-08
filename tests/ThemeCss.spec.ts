@@ -247,3 +247,16 @@ test("does not paint content containers as inset surfaces", () => {
 }`,
   );
 });
+
+test("ordinary bullets blend into every surface while collapsed bullets retain their ring", () => {
+  const css = buildThemeCss(resolveThemePalette());
+  expect(css).toContain(`.roamjs-custom-dark-theme .rm-bullet__inner {
+  background-color: var(--cdt-bullet) !important;
+  border-color: transparent !important;
+}`);
+  expect(css)
+    .toContain(`.roamjs-custom-dark-theme .rm-bullet.rm-bullet--closed .rm-bullet__inner {
+  background-color: transparent !important;
+  border-color: var(--cdt-bullet) !important;
+}`);
+});

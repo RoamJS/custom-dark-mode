@@ -201,7 +201,7 @@ body.${THEME_CLASS},
 
 .${THEME_CLASS} .rm-bullet__inner {
   background-color: ${color("bullet")} !important;
-  border-color: ${color("mainSurface")} !important;
+  border-color: transparent !important;
 }
 
 .${THEME_CLASS} .rm-bullet.rm-bullet--closed .rm-bullet__inner {
