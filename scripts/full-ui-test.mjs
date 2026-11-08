@@ -1239,11 +1239,16 @@ const verifyDeskBullets = async (page, returnPageUid) => {
         }, ids),
     });
   } finally {
-    if (added)
-      await click(
-        page.locator(".rm-desk--overlay .rm-desk__remove"),
-        "Remove only test fixture from Desk",
+    if (added) {
+      const fixtureDesk = page.locator(".rm-desk--overlay").filter({
+        has: page.locator(
+          `.rm-desk__slot:not([inert]) [data-block-uid="${ids.root}"]`,
+        ),
+      });
+      await uiAction("Remove only test fixture from Desk", () =>
+        fixtureDesk.locator(".rm-desk__remove").click({ timeout }),
       );
+    }
     const close = page.locator(".rm-desk--overlay .rm-desk__close");
     if (await close.isVisible().catch(() => false))
       await click(close, "Close floating Desk");
