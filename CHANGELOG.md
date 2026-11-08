@@ -11,6 +11,8 @@
 
 ### Fixed
 
+- Removed the false collapsed-block outline from expanded and childless bullets on Desk and other raised surfaces.
+
 - Made Graph Overview labels and controls readable against dark theme surfaces.
 
 ## 1.0.0 - 2026-07-01

@@ -1,14 +1,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
 import { chromium } from "playwright-runtime";
+import { pathToFileURL } from "node:url";
 
 const repoDir = process.cwd();
-const DEFAULT_GRAPH_URL =
-  process.env.ROAM_GRAPH_URL || "https://roamresearch.com/#/app/jarvis-sandbox";
+let DEFAULT_GRAPH_URL;
 const outDir = path.join(repoDir, "local", "full-ui-test", "latest");
 const screenshotDir = path.join(outDir, "screenshots");
 const videoDir = path.join(outDir, "video");
-const profileDir = path.join(repoDir, "local", "full-ui-test", "profile");
+let profileDir;
 const timeout = 45_000;
 const actionDelayMs = 215;
 const viewport = { width: 1440, height: 1000 };
@@ -80,6 +81,7 @@ const slug = (value) =>
 const uiAction = async (label, callback) => {
   const startedAt = Date.now();
   try {
+    console.log(label);
     const value = await callback();
     await wait(actionDelayMs);
     actions.push({
@@ -287,7 +289,7 @@ const installDirectoryPickerShim = async (page) => {
         value: async () => directoryHandle,
       });
     },
-    { dirName: path.basename(repoDir), entries: files },
+    { dirName: extensionName, entries: files },
   );
 };
 
@@ -1148,18 +1150,158 @@ const writeMarkdownReport = async (result) => {
   await fs.writeFile(path.join(outDir, "results.md"), `${lines.join("\n")}\n`);
 };
 
+const verifyDeskBullets = async (page, returnPageUid) => {
+  const ids = await page.evaluate(async () => {
+    const api = window.roamAlphaAPI;
+    const ids = Object.fromEntries(
+      ["page", "root", "leaf", "closed"].map((key) => [
+        key,
+        api.util.generateUID(),
+      ]),
+    );
+    await api.data.page.create({
+      page: { title: `CDT Desk bullet fixture ${ids.page}`, uid: ids.page },
+    });
+    for (const [uid, parent, order, string, open] of [
+      [ids.root, ids.page, 0, "in order of priority", true],
+      [ids.leaf, ids.root, 0, "Childless block", true],
+      [ids.closed, ids.root, 1, "Collapsed block", false],
+      [api.util.generateUID(), ids.closed, 0, "Hidden child", true],
+    ])
+      await api.data.block.create({
+        location: { "parent-uid": parent, order },
+        block: { uid, string, open },
+      });
+    await api.ui.mainWindow.openPage({ page: { uid: ids.page } });
+    return ids;
+  });
+  let added = false;
+  try {
+    const root = page
+      .locator(`.roam-article [data-block-uid="${ids.root}"]`)
+      .first();
+    await root.waitFor({ timeout });
+    await uiAction("Open Desk fixture context menu", () =>
+      root.locator(".rm-bullet").first().click({ button: "right" }),
+    );
+    await click(
+      page.getByText("Add to Desk", { exact: true }),
+      "Add fixture to Desk",
+    );
+    added = true;
+    const desk = page.locator(".rm-desk--overlay");
+    if (!(await desk.isVisible().catch(() => false))) {
+      await press(page, "Alt+Shift+s", "Open floating Desk");
+    }
+    await desk.waitFor({ timeout });
+    await desk.locator(`[data-block-uid="${ids.root}"]`).waitFor({ timeout });
+    const screenshot = await capture({
+      page,
+      name: "02b-desk-bullets",
+      label: "Desk and main page: expanded, childless and collapsed bullets",
+    });
+    await check({
+      name: "Desk bullets match main page for expanded, childless and collapsed blocks",
+      screenshot,
+      test: () =>
+        page.evaluate((ids) => {
+          const read = (surface, uid) => {
+            const block = document.querySelector(
+              `${surface} [data-block-uid="${uid}"]`,
+            );
+            const bullet = block?.querySelector(".rm-bullet");
+            const inner = bullet?.querySelector(".rm-bullet__inner");
+            if (!inner) throw new Error(`Missing ${surface} bullet ${uid}`);
+            const style = getComputedStyle(inner);
+            return {
+              closed: bullet.classList.contains("rm-bullet--closed"),
+              border: style.borderTopColor,
+              background: style.backgroundColor,
+            };
+          };
+          const values = ["root", "leaf", "closed"].map((key) => ({
+            key,
+            main: read(".roam-article", ids[key]),
+            desk: read(".rm-desk--overlay", ids[key]),
+          }));
+          return {
+            passed: values.every(
+              ({ key, main, desk }) =>
+                JSON.stringify(main) === JSON.stringify(desk) &&
+                (key === "closed"
+                  ? desk.closed &&
+                    desk.border !== "rgba(0, 0, 0, 0)" &&
+                    desk.background === "rgba(0, 0, 0, 0)"
+                  : !desk.closed && desk.border === "rgba(0, 0, 0, 0)"),
+            ),
+            details: values,
+          };
+        }, ids),
+    });
+  } finally {
+    if (added) {
+      const fixtureDesk = page.locator(".rm-desk--overlay").filter({
+        has: page.locator(
+          `.rm-desk__slot:not([inert]) [data-block-uid="${ids.root}"]`,
+        ),
+      });
+      await uiAction("Remove only test fixture from Desk", () =>
+        fixtureDesk.locator(".rm-desk__remove").click({ timeout }),
+      );
+    }
+    const close = page.locator(".rm-desk--overlay .rm-desk__close");
+    if (await close.isVisible().catch(() => false))
+      await click(close, "Close floating Desk");
+    if (returnPageUid) {
+      await page.evaluate(
+        (uid) => window.roamAlphaAPI.ui.mainWindow.openPage({ page: { uid } }),
+        returnPageUid,
+      );
+      await page.waitForURL(`**/page/${returnPageUid}`, { timeout });
+    }
+    await page.evaluate(
+      (uid) => window.roamAlphaAPI.data.page.delete({ page: { uid } }),
+      ids.page,
+    );
+  }
+};
+
 const main = async () => {
   await fs.rm(outDir, { recursive: true, force: true });
   await fs.mkdir(screenshotDir, { recursive: true });
   await fs.mkdir(videoDir, { recursive: true });
 
-  const context = await chromium.launchPersistentContext(profileDir, {
-    channel: process.env.PLAYWRIGHT_CHANNEL || "chrome",
+  const sessionHelper =
+    process.env.ROAM_SESSION_HELPER ||
+    path.join(
+      os.homedir(),
+      ".agents",
+      "skills",
+      "roamjs",
+      "roamjs-playwright-session",
+      "scripts",
+      "roam-session.mjs",
+    );
+  const { openRoamSession } = await import(pathToFileURL(sessionHelper).href);
+  const session = await openRoamSession({
+    cwd: repoDir,
+    chromium,
+    cdp: true,
+    slot: process.env.ROAM_TEST_SLOT || "auto",
     headless: true,
     viewport,
     recordVideo: { dir: videoDir, size: viewport },
   });
-  const page = context.pages()[0] || (await context.newPage());
+  console.log(
+    JSON.stringify({
+      phase: "session-ready",
+      slot: session.slot,
+      cdpUrl: session.cdpUrl,
+    }),
+  );
+  const { context, page } = session;
+  DEFAULT_GRAPH_URL = session.graphUrl;
+  profileDir = session.profileDir;
   const video = page.video();
   let fixture = null;
   let fixtureCleanup = { attempted: false, succeeded: true, pages: [] };
@@ -1367,6 +1509,36 @@ const main = async () => {
           };
         }),
     });
+
+    await check({
+      name: "Expanded and childless bullets have no false collapsed ring",
+      screenshot: contentScreenshot,
+      test: () =>
+        page.evaluate(() => {
+          const bullets = [
+            ...document.querySelectorAll(
+              ".rm-bullet:not(.rm-bullet--closed) .rm-bullet__inner",
+            ),
+          ];
+          const borders = bullets.map(
+            (bullet) => getComputedStyle(bullet).borderTopColor,
+          );
+          return {
+            passed:
+              borders.length > 0 &&
+              borders.every((border) => border === "rgba(0, 0, 0, 0)"),
+            details: { count: borders.length, borders: [...new Set(borders)] },
+          };
+        }),
+    });
+
+    await verifyDeskBullets(page, fixture.sourceUid);
+    await navigate(
+      page,
+      `${DEFAULT_GRAPH_URL}/page/${fixture.sourceUid}`,
+      ".roam-article",
+      "Return from Desk fixture to gallery",
+    );
 
     const galleryScreenshot = await capture({
       page,
@@ -2646,7 +2818,7 @@ const main = async () => {
       };
       consoleErrors.push(`Fixture cleanup failed: ${error.message}`);
     }
-    await context.close();
+    await session.close();
     const temporaryVideoPath = video
       ? await video.path().catch(() => null)
       : null;
@@ -2674,6 +2846,9 @@ const main = async () => {
         rightSidebarRestoration.succeeded &&
         actions.every(({ status }) => status === "passed"),
       graphUrl: DEFAULT_GRAPH_URL,
+      slot: session.slot,
+      profileDir: session.profileDir,
+      envPath: session.envPath,
       repoDir,
       extensionName,
       actionDelayMs,
