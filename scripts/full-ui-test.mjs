@@ -1150,7 +1150,7 @@ const writeMarkdownReport = async (result) => {
   await fs.writeFile(path.join(outDir, "results.md"), `${lines.join("\n")}\n`);
 };
 
-const verifyDeskBullets = async (page) => {
+const verifyDeskBullets = async (page, returnPageUid) => {
   const ids = await page.evaluate(async () => {
     const api = window.roamAlphaAPI;
     const ids = Object.fromEntries(
@@ -1247,6 +1247,13 @@ const verifyDeskBullets = async (page) => {
     const close = page.locator(".rm-desk--overlay .rm-desk__close");
     if (await close.isVisible().catch(() => false))
       await click(close, "Close floating Desk");
+    if (returnPageUid) {
+      await page.evaluate(
+        (uid) => window.roamAlphaAPI.ui.mainWindow.openPage({ page: { uid } }),
+        returnPageUid,
+      );
+      await page.waitForURL(`**/page/${returnPageUid}`, { timeout });
+    }
     await page.evaluate(
       (uid) => window.roamAlphaAPI.data.page.delete({ page: { uid } }),
       ids.page,
@@ -1520,7 +1527,7 @@ const main = async () => {
         }),
     });
 
-    await verifyDeskBullets(page);
+    await verifyDeskBullets(page, fixture.sourceUid);
     await navigate(
       page,
       `${DEFAULT_GRAPH_URL}/page/${fixture.sourceUid}`,
